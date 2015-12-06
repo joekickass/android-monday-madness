@@ -1,0 +1,13 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.0.0-alpha1'
+        classpath 'net.researchgate:gradle-release:2.3.4'
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

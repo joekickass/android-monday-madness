@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- DialogFragment views shouldn't be assigned a view parent -->
+    <issue id="InflateParams">
+        <ignore path="src/main/java/com/joekickass/mondaymadness/menu/interval/AddIntervalDialogFragment.java" />
+    </issue>
+
+    <!-- Don't want Google Search indexing on a simple interval app -->
+    <issue id="GoogleAppIndexingWarning" severity="ignore" />
+
+    <!-- See https://github.com/realm/realm-java/issues/593 -->
+    <issue id="InvalidPackage" severity="ignore"/>
+
+    <!-- Don't care about content descriptions -->
+    <issue id="ContentDescription" severity="ignore" />
+</lint>

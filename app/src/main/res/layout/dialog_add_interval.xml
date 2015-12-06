@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/work_section"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="@dimen/activity_horizontal_margin">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:src="@drawable/ic_rowing_black_24dp"/>
+
+        <com.joekickass.mondaymadness.menu.interval.AddIntervalPicker
+            android:id="@+id/work_minute_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:scaleY="0.7"
+            android:scaleX="0.7"
+            min="0"
+            max="59"/>
+
+        <com.joekickass.mondaymadness.menu.interval.AddIntervalPicker
+            android:id="@+id/work_second_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleY="0.7"
+            android:scaleX="0.7"
+            min="0"
+            max="59"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/rest_section"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-50dp"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_below="@id/work_section">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:src="@drawable/ic_hotel_black_24dp"/>
+
+        <com.joekickass.mondaymadness.menu.interval.AddIntervalPicker
+            android:id="@+id/rest_minute_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:scaleY="0.7"
+            android:scaleX="0.7"
+            min="0"
+            max="59"/>
+
+        <com.joekickass.mondaymadness.menu.interval.AddIntervalPicker
+            android:id="@+id/rest_second_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleY="0.7"
+            android:scaleX="0.7"
+            min="0"
+            max="59"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/repetition_section"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-50dp"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_below="@id/rest_section">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:src="@drawable/ic_loop_black_24dp"/>
+
+        <com.joekickass.mondaymadness.menu.interval.AddIntervalPicker
+            android:id="@+id/repetition_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:scaleY="0.7"
+            android:scaleX="0.7"
+            min="1"
+            max="40"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

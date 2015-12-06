@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="IntervalTimerView">
+        <attr name="color_progress" format="reference|color" />
+        <attr name="color_background" format="reference|color" />
+        <attr name="color_text" format="reference|color" />
+    </declare-styleable>
+</resources>

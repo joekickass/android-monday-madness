@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <color tools:override="true" name="primary_material_dark">#009688</color>
+    <color tools:override="true" name="primary_dark_material_dark">#00796b</color>
+    <color tools:override="true" name="accent_material_light">#00e5ff</color>
+
+    <color name="progresswheel_progress">@color/accent_material_light</color>
+    <color name="progresswheel_dark">#4d4d4d</color>
+</resources>

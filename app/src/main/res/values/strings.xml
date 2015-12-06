@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">MondayMadness</string>
+    <string name="action_refresh">Restart</string>
+    <string name="action_add">New</string>
+    <string name="add_interval">Add new interval</string>
+    <string name="unknown">Unknown</string>
+    <string name="title_version">Version</string>
+    <string name="title_md_icons_attr">Material Design Icons by Google</string>
+    <string name="md_icons_attr">Licensed under CC-BY, see https://creativecommons.org/licenses/by/4.0/legalcode</string>
+    <string name="action_about">About app</string>
+</resources>

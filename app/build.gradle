@@ -1,0 +1,65 @@
+repositories {
+    jcenter()
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'net.researchgate.release'
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.spotify.sdk:spotify-auth:1.0.0-beta12@aar'
+    compile 'com.spotify.sdk:spotify-player:1.0.0-beta12@aar'
+    compile 'io.realm:realm-android:0.86.0'
+}
+
+apply from: '../versioning.gradle'
+
+Properties props = new Properties()
+props.load(new FileInputStream(rootProject.file("release.properties")))
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion '23.0.2'
+
+    defaultConfig {
+        applicationId "com.joekickass.mondaymadness"
+        minSdkVersion 22
+        targetSdkVersion 23
+        versionCode buildVersionCode()
+        versionName version
+    }
+
+    signingConfigs {
+        release {
+            storeFile rootProject.file(props['storeFile'])
+            storePassword props['storePassword']
+            keyAlias props['keyAlias']
+            keyPassword props['keyPassword']
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+android.applicationVariants.all { variant ->
+    renameApk(variant)
+}
+
+release {
+    versionPropertyFile = 'gradle.properties'
+    git {
+        requireBranch = 'master'
+        pushToRemote = 'origin'
+        pushToBranchPrefix = ''
+    }
+}

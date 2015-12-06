@@ -1,0 +1,3 @@
+rootProject.name = "MondayMadness"
+include ':app'
+project(':app').name = rootProject.name

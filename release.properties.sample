@@ -1,0 +1,4 @@
+storeFile=<rel path to keystore from project root, release.keystore by convention>
+storePassword=<store pass>
+keyAlias=<key alias>
+keyPassword=<key pass>
