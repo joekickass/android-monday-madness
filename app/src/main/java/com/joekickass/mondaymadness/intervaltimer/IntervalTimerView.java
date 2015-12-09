@@ -28,7 +28,7 @@ public class IntervalTimerView extends View {
         void onIntervalFinished();
     }
 
-    private enum State { FINISHED, INITIALIZED, RUNNING, PAUSED };
+    private enum State { FINISHED, INITIALIZED, RUNNING, PAUSED }
 
     // TODO: Make relative view size?
     private static final int HANDLE_RADIUS = 5;
