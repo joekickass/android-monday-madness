@@ -27,7 +27,9 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
-import static com.joekickass.mondaymadness.spotify.SpotifyFacade.*;
+import static com.joekickass.mondaymadness.spotify.SpotifyConstants.CLIENT_ID;
+import static com.joekickass.mondaymadness.spotify.SpotifyConstants.REDIRECT_URI;
+import static com.joekickass.mondaymadness.spotify.SpotifyConstants.REQUEST_CODE;
 
 /**
  * Main entry point for app
@@ -42,7 +44,7 @@ public class MadnessActivity extends AppCompatActivity implements IntervalTimer.
 
     private static final String TAG = MadnessActivity.class.getSimpleName();
 
-    private final SpotifyFacade mFacade = new SpotifyFacade();
+    private SpotifyFacade mFacade = null;
 
     private IntervalTimer mTimer;
 
@@ -53,7 +55,7 @@ public class MadnessActivity extends AppCompatActivity implements IntervalTimer.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
+        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID ,
                 AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
         builder.setScopes(new String[]{"user-read-private", "streaming"});
         AuthenticationRequest request = builder.build();
@@ -113,8 +115,8 @@ public class MadnessActivity extends AppCompatActivity implements IntervalTimer.
         switch (item.getItemId()) {
 
             case R.id.action_reset:
-                mTimer.reset();
                 mFacade.stop();
+                setNewInterval();
                 return true;
 
             case R.id.action_add:
@@ -152,7 +154,7 @@ public class MadnessActivity extends AppCompatActivity implements IntervalTimer.
     public void onIntervalTimerFinished() {
         Log.d(TAG, "onIntervalTimerFinished");
         mFacade.stop();
-        mTimer.reset();
+        setNewInterval();
     }
 
     private Interval getLastInterval() {
@@ -180,7 +182,7 @@ public class MadnessActivity extends AppCompatActivity implements IntervalTimer.
                     @Override
                     public void onInitialized(Player player) {
                         Log.d(TAG, "Spotify initialized");
-                        mFacade.init(player);
+                        mFacade = new SpotifyFacade(player);
                         mFab.setEnabled(true);
                     }
 

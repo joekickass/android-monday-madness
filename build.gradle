@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0-alpha1'
+        classpath 'com.android.tools.build:gradle:2.0.0-beta2'
         classpath 'net.researchgate:gradle-release:2.3.4'
     }
 }
