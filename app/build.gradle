@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.0.0-rc-1036'
+    ext.realm_version = '0.87.4'
 
     repositories {
         jcenter()
@@ -26,8 +27,11 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile 'com.spotify.sdk:spotify-auth:1.0.0-beta12@aar'
     compile 'com.spotify.sdk:spotify-player:1.0.0-beta12@aar'
-    compile 'io.realm:realm-android:0.86.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "io.realm:realm-android:$realm_version"
+    // Fix for stupid Realm bug with Kotlin https://github.com/realm/realm-java/issues/509
+    kapt "io.realm:realm-annotations:$realm_version"
+    kapt "io.realm:realm-annotations-processor:$realm_version"
 }
 
 apply from: '../versioning.gradle'
