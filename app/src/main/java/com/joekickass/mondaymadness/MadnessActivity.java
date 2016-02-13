@@ -121,7 +121,7 @@ public class MadnessActivity extends AppCompatActivity implements IntervalTimer.
 
             case R.id.action_add:
                 Interval interval = getLastInterval();
-                AddIntervalDialogFragment pickTime = AddIntervalDialogFragment.newInstance(
+                AddIntervalDialogFragment pickTime = AddIntervalDialogFragment.Companion.newInstance(
                         interval.getWorkInMillis(),
                         interval.getRestInMillis(),
                         interval.getRepetitions());
