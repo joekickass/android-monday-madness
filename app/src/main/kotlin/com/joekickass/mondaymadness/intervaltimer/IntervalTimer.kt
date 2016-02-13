@@ -13,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 class IntervalTimer(private val view: IntervalTimerView,
                     private val workInMillis: Long,
                     private val restInMillis: Long,
-                    private val repetitions: Int) : IntervalTimerView.Callback {
+                    private val repetitions: Int) {
 
     interface IntervalTimerListener {
         fun onWorkFinished()
@@ -29,10 +29,9 @@ class IntervalTimer(private val view: IntervalTimerView,
     private val mListeners = CopyOnWriteArrayList<IntervalTimerListener>()
 
     init {
-        view.registerCallback(this)
         workQueue = generateWorkQueue(workInMillis, restInMillis, repetitions)
         current = workQueue.poll()
-        view.init(current.time)
+        view.init(current.time, { intervalFinished() })
     }
 
     fun start() {
@@ -46,7 +45,15 @@ class IntervalTimer(private val view: IntervalTimerView,
     val isRunning: Boolean
         get() = view.isRunning
 
-    override fun onIntervalFinished() {
+    fun addListener(listener: IntervalTimerListener) {
+        mListeners.add(listener)
+    }
+
+    fun removeListener(listener: IntervalTimerListener) {
+        mListeners.remove(listener)
+    }
+
+    private fun intervalFinished() {
 
         // Notify listeners
         for (listener in mListeners) {
@@ -59,21 +66,13 @@ class IntervalTimer(private val view: IntervalTimerView,
         // Start new if there are any intervals left
         if (!workQueue.isEmpty()) {
             current = workQueue.poll()
-            view.init(current.time)
+            view.init(current.time, { intervalFinished() })
             view.start()
         } else {
             for (listener in mListeners) {
                 listener.onIntervalTimerFinished()
             }
         }
-    }
-
-    fun addListener(listener: IntervalTimerListener) {
-        mListeners.add(listener)
-    }
-
-    fun removeListener(listener: IntervalTimerListener) {
-        mListeners.remove(listener)
     }
 
     private fun generateWorkQueue(work: Long, rest: Long, repetitions: Int): Queue<Interval> {
