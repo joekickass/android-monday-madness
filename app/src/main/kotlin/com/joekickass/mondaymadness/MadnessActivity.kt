@@ -19,6 +19,7 @@ import com.joekickass.mondaymadness.spotify.REQUEST_CODE
 import com.joekickass.mondaymadness.spotify.SpotifyFacade
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
+import com.spotify.sdk.android.authentication.AuthenticationResponse
 import com.spotify.sdk.android.player.Config
 import com.spotify.sdk.android.player.Player
 import com.spotify.sdk.android.player.Spotify
@@ -26,8 +27,6 @@ import com.spotify.sdk.android.player.Spotify
 import io.realm.Realm
 import io.realm.RealmChangeListener
 import io.realm.Sort
-
-import com.spotify.sdk.android.authentication.AuthenticationResponse.Type.TOKEN
 
 /**
  * Main entry point for app
@@ -37,7 +36,7 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse.Type.TOKEN
  * intervals will be added to Realm, and [MadnessActivity] will be notified through
  * [RealmChangeListener].
  */
-class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener, RealmChangeListener {
+class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener, RealmChangeListener<Realm> {
 
     private var mFacade: SpotifyFacade? = null
 
@@ -49,9 +48,9 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val builder = AuthenticationRequest.Builder(CLIENT_ID, TOKEN, REDIRECT_URI)
-        builder.setScopes(arrayOf("user-read-private", "streaming"))
-        val request = builder.build()
+        val request = AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI)
+                .setScopes(arrayOf("user-read-private", "playlist-read", "playlist-read-private", "streaming"))
+                .build()
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request)
 
         mFab = findViewById(R.id.fab) as FloatingActionButton
@@ -67,7 +66,7 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
             }
         }
 
-        val realm = Realm.getInstance(applicationContext)
+        val realm = Realm.getDefaultInstance()
         realm.addChangeListener(this)
 
         setNewInterval()
@@ -87,7 +86,7 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
         super.onDestroy()
         Spotify.destroyPlayer(this)
         mTimer!!.removeListener(this)
-        val realm = Realm.getInstance(applicationContext)
+        val realm = Realm.getDefaultInstance()
         realm.removeChangeListener(this)
         realm.close()
     }
@@ -150,7 +149,7 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
             return if (!result.isEmpty()) result.first() else Interval()
         }
 
-    override fun onChange() {
+    override fun onChange(realm: Realm) {
         Log.d(TAG, "Setting up new interval")
         setNewInterval()
     }
@@ -160,7 +159,7 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
 
         if (requestCode == REQUEST_CODE) {
             val response = AuthenticationClient.getResponse(resultCode, intent)
-            if (response.type == TOKEN) {
+            if (response.type == AuthenticationResponse.Type.TOKEN) {
                 val playerConfig = Config(this, response.accessToken, CLIENT_ID)
                 Spotify.getPlayer(playerConfig, this, object : Player.InitializationObserver {
 
