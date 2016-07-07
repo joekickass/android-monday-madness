@@ -1,5 +1,7 @@
 package com.joekickass.mondaymadness.intervaltimer
 
+import android.os.SystemClock
+import com.joekickass.mondaymadness.model.Timer
 import java.util.LinkedList
 import java.util.Queue
 import java.util.concurrent.CopyOnWriteArrayList
@@ -25,13 +27,16 @@ class IntervalTimer(private val view: IntervalTimerView,
 
     private var current: Interval
 
+    private var timer: Timer = Timer(0)
+
     // TODO: Create special notifier/listener class with thread handling?
     private val mListeners = CopyOnWriteArrayList<IntervalTimerListener>()
 
     init {
         workQueue = generateWorkQueue(workInMillis, restInMillis, repetitions)
         current = workQueue.poll()
-        view.init(current.time, { intervalFinished() })
+        timer = Timer(current.time)
+        view.init(timer, { intervalFinished() })
     }
 
     fun start() {
@@ -43,7 +48,7 @@ class IntervalTimer(private val view: IntervalTimerView,
     }
 
     val isRunning: Boolean
-        get() = view.isRunning
+        get() = timer.isRunning
 
     fun addListener(listener: IntervalTimerListener) {
         mListeners.add(listener)
@@ -66,7 +71,8 @@ class IntervalTimer(private val view: IntervalTimerView,
         // Start new if there are any intervals left
         if (!workQueue.isEmpty()) {
             current = workQueue.poll()
-            view.init(current.time, { intervalFinished() })
+            timer = Timer(current.time)
+            view.init(timer, { intervalFinished() })
             view.start()
         } else {
             for (listener in mListeners) {

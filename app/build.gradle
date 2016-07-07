@@ -16,6 +16,7 @@ dependencies {
     compile 'com.android.support:design:24.0.0'
     compile 'com.spotify.sdk:spotify-auth:1.0.0-beta12@aar'
     compile 'com.spotify.sdk:spotify-player:1.0.0-beta12@aar'
+    testCompile 'junit:junit:4.12'
 }
 
 apply from: '../versioning.gradle'
@@ -54,6 +55,7 @@ android {
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
     }
 }
 

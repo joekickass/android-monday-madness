@@ -10,6 +10,7 @@ import android.view.View
 
 import com.joekickass.mondaymadness.R.styleable.IntervalTimerView
 import com.joekickass.mondaymadness.R.styleable.*
+import com.joekickass.mondaymadness.model.Timer
 
 /**
  * A graphical visualization of a interval timer (countdown timer)
@@ -24,9 +25,7 @@ import com.joekickass.mondaymadness.R.styleable.*
  */
 class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-    private enum class State {
-        FINISHED, INITIALIZED, RUNNING, PAUSED
-    }
+    private var mTimer = Timer(0)
 
     // Internal
     private val mBackgroundPaint = Paint()
@@ -34,19 +33,12 @@ class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, a
     private val mTextPaint = Paint()
     private val mCircleBounds = RectF()
 
-    // Input params
-    private var mTotalInMillis: Long = 0
-
     // Callback function
     private var mNotifyFinished : () -> Unit = {}
 
     private var mTextOffset: Float = 0.toFloat()
-    private var mState: State? = null
-    private var mStartTimeInMillis: Long = 0
-    private var mTimeLeftInMillis: Long = 0
 
     init {
-
         // Read attributes
         val a = context.theme.obtainStyledAttributes(attrs, IntervalTimerView, 0, 0)
         try {
@@ -66,45 +58,26 @@ class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, a
         } finally {
             a.recycle()
         }
-
-        // start in finished state (no work time set)
-        finish()
     }
 
-    fun init(workInMillis: Long, notifyFinished : () -> Unit) {
-        mStartTimeInMillis = 0
-        mTimeLeftInMillis = 0
-        mTotalInMillis = workInMillis
+    fun init(timer: Timer, notifyFinished : () -> Unit) {
+        mTimer = timer
         mNotifyFinished = notifyFinished
-        mState = State.INITIALIZED
         postInvalidateOnAnimation()
     }
 
     fun start() {
-        if (isFinished) {
-            throw IllegalStateException("Must (re)initialize view before starting")
-        }
-        mStartTimeInMillis = SystemClock.elapsedRealtime()
-        // If we were paused, we need to subtract time already spent in this interval
-        mStartTimeInMillis -= if (isPaused) mTotalInMillis - mTimeLeftInMillis else 0
-        mState = State.RUNNING
+        mTimer.start()
         postInvalidateOnAnimation()
     }
 
     fun pause() {
-        if (isFinished) {
-            throw IllegalStateException("Must (re)initialize view before pausing")
-        }
-        mStartTimeInMillis = 0
-        mState = State.PAUSED
+        mTimer.pause()
         postInvalidateOnAnimation()
     }
 
     fun finish() {
-        mStartTimeInMillis = 0
-        mTimeLeftInMillis = 0
-        mTotalInMillis = 0
-        mState = State.FINISHED
+        mTimer.finish()
         postInvalidateOnAnimation()
         mNotifyFinished()
     }
@@ -122,23 +95,18 @@ class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, a
                 centerHeight + RADIUS)
 
         // Not yet started, show empty ring and total time (can be '0.0' if finished)
-        if (isFinished || isInitialized) {
-            val value = java.lang.Double.toString((mTotalInMillis / 100).toDouble() / 10)
+        if (mTimer.isFinished || mTimer.isInitialized) {
+
             canvas.drawCircle(centerWidth, centerHeight, RADIUS, mBackgroundPaint)
-            canvas.drawText(value, centerWidth, centerHeight + mTextOffset, mTextPaint)
+            canvas.drawText(
+                    mTimer.text,
+                    centerWidth,
+                    centerHeight + mTextOffset,
+                    mTextPaint)
             return
         }
 
-        // Calculate new progress only if we're running, else keep the old value...
-        if (isRunning) {
-            mTimeLeftInMillis = mTotalInMillis - (SystemClock.elapsedRealtime() - mStartTimeInMillis)
-        }
-
-        // Finish if we reached 0
-        if (mTimeLeftInMillis <= 0) {
-            finish()
-            return
-        }
+        mTimer.tick()
 
         // Since drawArc only draws clockwise, we need to start with the whole circle filled with
         // accent color, then paint it over with the background. It will look like it is the accent
@@ -147,42 +115,30 @@ class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, a
 
         // Display text inside the circle
         canvas.drawText(
-                java.lang.Double.toString((mTimeLeftInMillis / 100).toDouble() / 10),
+                mTimer.text,
                 centerWidth,
                 centerHeight + mTextOffset,
                 mTextPaint)
 
         // Draw progress circle
-        val timeLeft = mTimeLeftInMillis.toDouble() / mTotalInMillis
-
         // Decrease accent color circle by painting it over with background color.
         canvas.drawArc(
                 mCircleBounds, // Size of progress circle
                 -90f, // -90 is at top
-                (timeLeft * 360).toFloat(), // [ 0 <= progress <= 1]
+                (mTimer.fraction * 360).toFloat(), // [ 0 <= progress <= 1]
                 false,
                 mBackgroundPaint)
 
         // Draw nob on the circle
-        canvas.drawCircle((centerWidth + Math.sin(timeLeft * 2.0 * Math.PI) * RADIUS).toFloat(),
-                (centerHeight - Math.cos(timeLeft * 2.0 * Math.PI) * RADIUS).toFloat(),
-                HANDLE_RADIUS.toFloat(), mProgressPaint)
+        canvas.drawCircle(
+                (centerWidth + Math.sin(mTimer.fraction * 2.0 * Math.PI) * RADIUS).toFloat(),
+                (centerHeight - Math.cos(mTimer.fraction * 2.0 * Math.PI) * RADIUS).toFloat(),
+                HANDLE_RADIUS.toFloat(),
+                mProgressPaint)
 
         // make sure we continue draw ourselves until time expires
         postInvalidateOnAnimation()
     }
-
-    val isRunning: Boolean
-        get() = mState == State.RUNNING
-
-    val isPaused: Boolean
-        get() = mState == State.PAUSED
-
-    val isInitialized: Boolean
-        get() = mState == State.INITIALIZED
-
-    val isFinished: Boolean
-        get() = mState == State.FINISHED
 
     private fun setPaintProperties(paint: Paint, color: Int) {
         paint.style = Paint.Style.STROKE

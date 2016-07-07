@@ -39,7 +39,7 @@ class AddIntervalDialogFragment : DialogFragment() {
         mInitialReps = arguments.getInt("reps")
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle): Dialog {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = inflateDialogView(activity.layoutInflater)
         return AlertDialog.Builder(activity).setTitle(R.string.add_interval).setView(dialog).setPositiveButton(android.R.string.ok
         ) { dialog, whichButton ->
