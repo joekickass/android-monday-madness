@@ -18,9 +18,15 @@ class TimerTest {
     }
 
     @Test
-    fun createNewTimerWithNegativeIntervalNotAllowed() {
+    fun newTimerWithNegativeIntervalNotAllowed() {
         exception.expect(IllegalArgumentException::class.java)
         Timer(-20)
+    }
+
+    @Test
+    fun newTimerWithZeroIntervalStartsInFinishedState() {
+        val timer = Timer(0)
+        Assert.assertTrue(timer.isFinished)
     }
 
     @Test

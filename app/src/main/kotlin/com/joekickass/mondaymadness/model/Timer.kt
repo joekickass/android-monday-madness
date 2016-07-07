@@ -22,7 +22,8 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
     private var timeLeftInMillis: Long = 0
 
     init {
-        if (timeInMillis < 0) throw IllegalArgumentException("Argument must not be less than zero")
+        if (timeInMillis < 0L) throw IllegalArgumentException("Argument must not be less than zero")
+        if (timeInMillis == 0L) finish()
         timeLeftInMillis = timeInMillis
     }
 

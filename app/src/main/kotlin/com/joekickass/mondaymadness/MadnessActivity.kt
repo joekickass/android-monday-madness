@@ -48,11 +48,6 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val request = AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI)
-                .setScopes(arrayOf("user-read-private", "playlist-read", "playlist-read-private", "streaming"))
-                .build()
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request)
-
         mFab = findViewById(R.id.fab) as FloatingActionButton
         mFab!!.isEnabled = false
         mFab!!.setOnClickListener {
@@ -71,6 +66,15 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
 
         setNewInterval()
         mTimer!!.addListener(this)
+
+        startSpotifyAuth()
+    }
+
+    private fun startSpotifyAuth() {
+        val request = AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI)
+                .setScopes(arrayOf("user-read-private", "playlist-read", "playlist-read-private", "streaming"))
+                .build()
+        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request)
     }
 
     private fun setNewInterval() {
@@ -154,27 +158,49 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
         setNewInterval()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
 
         if (requestCode == REQUEST_CODE) {
+
             val response = AuthenticationClient.getResponse(resultCode, intent)
-            if (response.type == AuthenticationResponse.Type.TOKEN) {
-                val playerConfig = Config(this, response.accessToken, CLIENT_ID)
-                Spotify.getPlayer(playerConfig, this, object : Player.InitializationObserver {
-
-                    override fun onInitialized(player: Player) {
-                        Log.d(TAG, "Spotify initialized")
-                        mFacade = SpotifyFacade(player)
-                        mFab!!.isEnabled = true
-                    }
-
-                    override fun onError(throwable: Throwable) {
-                        Log.e(TAG, "Could not initialize player: " + throwable.message)
-                    }
-                })
+            when (response.type) {
+                AuthenticationResponse.Type.TOKEN -> handleLoginSuccess(response.accessToken)
+                AuthenticationResponse.Type.ERROR -> handleLoginError(response.error)
+                else -> handleLoginInterrupted()
             }
         }
+    }
+
+    private fun handleLoginSuccess(token: String) {
+        Log.d(TAG, "Authenticated with Spotify, initializing player...")
+
+        val playerConfig = Config(this, token, CLIENT_ID)
+        Spotify.getPlayer(playerConfig, this, object : Player.InitializationObserver {
+
+            override fun onInitialized(player: Player) {
+                Log.d(TAG, "Spotify player initialized")
+                mFacade = SpotifyFacade(player)
+                mFab!!.isEnabled = true
+            }
+
+            override fun onError(throwable: Throwable) {
+                Log.e(TAG, "Could not initialize Spotify player: " + throwable.message)
+                TODO()
+            }
+        })
+    }
+
+    private fun handleLoginError(error: String) {
+        Log.e(TAG, "Failed to authenticate with Spotify: " + error)
+        Log.d(TAG, "Clearing cookies and retrying...")
+        //TODO: Readd when new release of Spotify SDK is available: AuthenticationClient.clearCookies(this)
+        startSpotifyAuth()
+    }
+
+    private fun handleLoginInterrupted() {
+        Log.d(TAG, "Most likely auth flow cancelled or interrupted, try again...")
+        startSpotifyAuth()
     }
 
     companion object {
