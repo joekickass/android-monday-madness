@@ -2,7 +2,6 @@ package com.joekickass.mondaymadness
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
@@ -28,6 +27,8 @@ import io.realm.Realm
 import io.realm.RealmChangeListener
 import io.realm.Sort
 
+import kotlinx.android.synthetic.main.activity_main.*
+
 /**
  * Main entry point for app
 
@@ -42,22 +43,19 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
 
     private var mTimer: IntervalTimer? = null
 
-    private var mFab: FloatingActionButton? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mFab = findViewById(R.id.fab) as FloatingActionButton
-        mFab!!.isEnabled = false
-        mFab!!.setOnClickListener {
+        fab.isEnabled = false
+        fab.setOnClickListener {
             mFacade!!.toggle()
             if (mTimer!!.isRunning) {
                 mTimer!!.pause()
-                mFab!!.setImageResource(R.drawable.ic_play_arrow_white_48dp)
+                fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
             } else {
                 mTimer!!.start()
-                mFab!!.setImageResource(R.drawable.ic_pause_white_48dp)
+                fab.setImageResource(R.drawable.ic_pause_white_48dp)
             }
         }
 
@@ -65,7 +63,6 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
         realm.addChangeListener(this)
 
         setNewInterval()
-        mTimer!!.addListener(this)
 
         startSpotifyAuth()
     }
@@ -78,12 +75,13 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
     }
 
     private fun setNewInterval() {
+        mTimer!!.removeListener(this)
         val interval = lastInterval
-        val intervalTimerView = findViewById(R.id.pwv) as IntervalTimerView
-        mTimer = IntervalTimer(intervalTimerView,
+        mTimer = IntervalTimer(pwv,
                 interval.workInMillis,
                 interval.restInMillis,
                 interval.repetitions)
+        mTimer!!.addListener(this)
     }
 
     override fun onDestroy() {
@@ -181,7 +179,7 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
             override fun onInitialized(player: Player) {
                 Log.d(TAG, "Spotify player initialized")
                 mFacade = SpotifyFacade(player)
-                mFab!!.isEnabled = true
+                fab.isEnabled = true
             }
 
             override fun onError(throwable: Throwable) {

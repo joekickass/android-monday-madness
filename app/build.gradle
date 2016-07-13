@@ -7,6 +7,7 @@ repositories {
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'net.researchgate.release'
 apply plugin: 'realm-android'
 
