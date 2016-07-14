@@ -19,13 +19,12 @@ class IntervalTimer(private val view: IntervalTimerView,
 
     private val workout = Workout(workInMillis, restInMillis, repetitions)
 
-    private var timer: Timer = Timer(0)
+    private var timer = Timer(workout.time)
 
     // TODO: Create special notifier/listener class with thread handling?
     private val mListeners = mutableListOf<IntervalTimerListener>()
 
     init {
-        timer = Timer(workout.time)
         view.init(timer, { intervalFinished() })
     }
 

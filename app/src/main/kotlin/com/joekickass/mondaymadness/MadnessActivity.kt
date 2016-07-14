@@ -77,6 +77,9 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
     private fun setNewInterval() {
         mTimer?.removeListener(this)
         val interval = lastInterval
+        Log.d(TAG, "Setting new interval: w=" + interval.workInMillis +
+                   " r=" + interval.restInMillis +
+                   " reps=" + interval.repetitions)
         mTimer = IntervalTimer(pwv,
                 interval.workInMillis,
                 interval.restInMillis,
@@ -142,6 +145,7 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
         Log.d(TAG, "onIntervalTimerFinished")
         mFacade!!.stop()
         setNewInterval()
+        fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
     }
 
     private val lastInterval: Interval

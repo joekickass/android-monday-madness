@@ -76,12 +76,6 @@ class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, a
         postInvalidateOnAnimation()
     }
 
-    fun finish() {
-        mTimer.finish()
-        postInvalidateOnAnimation()
-        mNotifyFinished()
-    }
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -107,6 +101,12 @@ class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, a
         }
 
         mTimer.tick()
+
+        if (mTimer.isFinished) {
+            postInvalidateOnAnimation()
+            mNotifyFinished()
+            return
+        }
 
         // Since drawArc only draws clockwise, we need to start with the whole circle filled with
         // accent color, then paint it over with the background. It will look like it is the accent
