@@ -5,6 +5,8 @@ import com.joekickass.mondaymadness.model.Workout
 
 /**
  * Controller for [IntervalTimerView]
+ *
+ * TODO: Refactor me!
  */
 class IntervalTimer(private val view: IntervalTimerView,
                     workInMillis: Long,

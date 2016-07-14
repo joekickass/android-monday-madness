@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
-import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.View
 
@@ -18,7 +17,7 @@ import com.joekickass.mondaymadness.model.Timer
  * To set a new interval, call [.init] with the desired interval time in ms.
  * To start the new interval, call [.start]. The view will handle countdown internally.
 
- * When a interval is finished, the [Callback.onIntervalFinished] callback is invoked.
+ * TODO: When a interval is finished, the [Callback.onIntervalFinished] callback is invoked.
 
  * Thanks to Antimonit for the idea behind this class.
  * http://stackoverflow.com/a/27293082
@@ -33,7 +32,7 @@ class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, a
     private val mTextPaint = Paint()
     private val mCircleBounds = RectF()
 
-    // Callback function
+    // TODO: Remove me
     private var mNotifyFinished : () -> Unit = {}
 
     private var mTextOffset: Float = 0.toFloat()
