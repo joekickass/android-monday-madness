@@ -3,7 +3,7 @@ package com.joekickass.mondaymadness.model
 import io.realm.RealmObject
 
 /**
- * Represents an interval session
+ * Represents one interval
  */
 open class Interval : RealmObject() {
     open var workInMillis: Long = 0

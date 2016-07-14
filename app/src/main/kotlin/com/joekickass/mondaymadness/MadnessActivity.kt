@@ -31,7 +31,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * Main entry point for app
-
+ *
  * Inflates the [IntervalTimerView] and connects it to its [IntervalTimer]
  * controller. Also delegates adding a new interval to the [AddIntervalDialogFragment]. New
  * intervals will be added to Realm, and [MadnessActivity] will be notified through
@@ -50,11 +50,11 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
         fab.isEnabled = false
         fab.setOnClickListener {
             mFacade!!.toggle()
-            if (mTimer!!.isRunning) {
-                mTimer!!.pause()
+            if (mTimer?.isRunning == true) {
+                mTimer?.pause()
                 fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
             } else {
-                mTimer!!.start()
+                mTimer?.start()
                 fab.setImageResource(R.drawable.ic_pause_white_48dp)
             }
         }
@@ -75,19 +75,19 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
     }
 
     private fun setNewInterval() {
-        mTimer!!.removeListener(this)
+        mTimer?.removeListener(this)
         val interval = lastInterval
         mTimer = IntervalTimer(pwv,
                 interval.workInMillis,
                 interval.restInMillis,
                 interval.repetitions)
-        mTimer!!.addListener(this)
+        mTimer?.addListener(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Spotify.destroyPlayer(this)
-        mTimer!!.removeListener(this)
+        mTimer?.removeListener(this)
         val realm = Realm.getDefaultInstance()
         realm.removeChangeListener(this)
         realm.close()

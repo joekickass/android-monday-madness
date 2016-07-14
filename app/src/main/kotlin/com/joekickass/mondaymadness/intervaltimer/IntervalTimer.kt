@@ -1,21 +1,15 @@
 package com.joekickass.mondaymadness.intervaltimer
 
-import android.os.SystemClock
 import com.joekickass.mondaymadness.model.Timer
-import java.util.LinkedList
-import java.util.Queue
-import java.util.concurrent.CopyOnWriteArrayList
+import com.joekickass.mondaymadness.model.Workout
 
 /**
  * Controller for [IntervalTimerView]
-
- * Handles two types of intervals; WORK and REST. It is also possible to create a chain of intervals
- * by specifying the number of repetitions.
  */
 class IntervalTimer(private val view: IntervalTimerView,
-                    private val workInMillis: Long,
-                    private val restInMillis: Long,
-                    private val repetitions: Int) {
+                    workInMillis: Long,
+                    restInMillis: Long,
+                    repetitions: Int) {
 
     interface IntervalTimerListener {
         fun onWorkFinished()
@@ -23,19 +17,15 @@ class IntervalTimer(private val view: IntervalTimerView,
         fun onIntervalTimerFinished()
     }
 
-    private var workQueue: Queue<Interval>
-
-    private var current: Interval
+    private val workout = Workout(workInMillis, restInMillis, repetitions)
 
     private var timer: Timer = Timer(0)
 
     // TODO: Create special notifier/listener class with thread handling?
-    private val mListeners = CopyOnWriteArrayList<IntervalTimerListener>()
+    private val mListeners = mutableListOf<IntervalTimerListener>()
 
     init {
-        workQueue = generateWorkQueue(workInMillis, restInMillis, repetitions)
-        current = workQueue.poll()
-        timer = Timer(current.time)
+        timer = Timer(workout.time)
         view.init(timer, { intervalFinished() })
     }
 
@@ -62,37 +52,20 @@ class IntervalTimer(private val view: IntervalTimerView,
 
         // Notify listeners
         for (listener in mListeners) {
-            when (current.type) {
-                IntervalTimer.Interval.IntervalType.WORK -> listener.onWorkFinished()
-                IntervalTimer.Interval.IntervalType.REST -> listener.onRestFinished()
-            }
+            if (workout.work) listener.onWorkFinished()
+            if (workout.rest) listener.onRestFinished()
         }
 
         // Start new if there are any intervals left
-        if (!workQueue.isEmpty()) {
-            current = workQueue.poll()
-            timer = Timer(current.time)
+        if (workout.hasNext()) {
+            workout.next()
+            timer = Timer(workout.time)
             view.init(timer, { intervalFinished() })
             view.start()
         } else {
             for (listener in mListeners) {
                 listener.onIntervalTimerFinished()
             }
-        }
-    }
-
-    private fun generateWorkQueue(work: Long, rest: Long, repetitions: Int): Queue<Interval> {
-        val ret = LinkedList<Interval>()
-        for (i in 1..repetitions) {
-            ret.add(Interval(Interval.IntervalType.WORK, work))
-            ret.add(Interval(Interval.IntervalType.REST, rest))
-        }
-        return ret
-    }
-
-    private class Interval internal constructor(internal var type: Interval.IntervalType, internal var time: Long) {
-        enum class IntervalType {
-            WORK, REST
         }
     }
 }
