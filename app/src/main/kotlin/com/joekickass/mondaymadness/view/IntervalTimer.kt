@@ -1,14 +1,14 @@
-package com.joekickass.mondaymadness.intervaltimer
+package com.joekickass.mondaymadness.view
 
 import com.joekickass.mondaymadness.model.Timer
 import com.joekickass.mondaymadness.model.Workout
 
 /**
- * Controller for [IntervalTimerView]
+ * Controller for [IntervalView]
  *
  * TODO: Refactor me!
  */
-class IntervalTimer(private val view: IntervalTimerView,
+class IntervalTimer(private val view: IntervalView,
                     workInMillis: Long,
                     restInMillis: Long,
                     repetitions: Int) {

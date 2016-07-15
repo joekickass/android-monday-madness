@@ -10,7 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 
 import com.joekickass.mondaymadness.R
-import com.joekickass.mondaymadness.model.Interval
+import com.joekickass.mondaymadness.realm.Interval
 
 import io.realm.Realm
 import io.realm.RealmResults

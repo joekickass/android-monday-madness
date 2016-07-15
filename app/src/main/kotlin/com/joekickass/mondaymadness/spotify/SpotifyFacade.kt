@@ -7,9 +7,6 @@ import com.spotify.sdk.android.player.Player
 import com.spotify.sdk.android.player.PlayerNotificationCallback
 import com.spotify.sdk.android.player.PlayerState
 
-// Temp playlist
-private const val PLAYLIST_URI = "spotify:user:joekickass:playlist:7dS1phK4Dcb3EG5IalwD4x"
-
 /**
  * Spotify API facade.
  *
@@ -77,4 +74,10 @@ class SpotifyFacade(private val player : Player) : ConnectionStateCallback, Play
     override fun onConnectionMessage(s: String) {
         Log.d(TAG, "onConnectionMessage")
     }
+
+    companion object {
+        // Temp playlist
+        private const val PLAYLIST_URI = "spotify:user:joekickass:playlist:7dS1phK4Dcb3EG5IalwD4x"
+    }
 }
+

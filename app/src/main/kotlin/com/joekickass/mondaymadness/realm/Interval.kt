@@ -1,9 +1,9 @@
-package com.joekickass.mondaymadness.model
+package com.joekickass.mondaymadness.realm
 
 import io.realm.RealmObject
 
 /**
- * Represents one interval
+ * Stores relevant stuff in Realm just for fun
  */
 open class Interval : RealmObject() {
     open var workInMillis: Long = 0

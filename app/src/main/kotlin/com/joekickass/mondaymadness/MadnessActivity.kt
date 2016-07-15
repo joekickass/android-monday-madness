@@ -9,9 +9,9 @@ import android.view.MenuItem
 
 import com.joekickass.mondaymadness.menu.about.AboutActivity
 import com.joekickass.mondaymadness.menu.interval.AddIntervalDialogFragment
-import com.joekickass.mondaymadness.intervaltimer.IntervalTimer
-import com.joekickass.mondaymadness.intervaltimer.IntervalTimerView
-import com.joekickass.mondaymadness.model.Interval
+import com.joekickass.mondaymadness.view.IntervalTimer
+import com.joekickass.mondaymadness.view.IntervalView
+import com.joekickass.mondaymadness.realm.Interval
 import com.joekickass.mondaymadness.spotify.CLIENT_ID
 import com.joekickass.mondaymadness.spotify.REDIRECT_URI
 import com.joekickass.mondaymadness.spotify.REQUEST_CODE
@@ -32,7 +32,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 /**
  * Main entry point for app
  *
- * Inflates the [IntervalTimerView] and connects it to its [IntervalTimer]
+ * Inflates the [IntervalView] and connects it to its [IntervalTimer]
  * controller. Also delegates adding a new interval to the [AddIntervalDialogFragment]. New
  * intervals will be added to Realm, and [MadnessActivity] will be notified through
  * [RealmChangeListener].

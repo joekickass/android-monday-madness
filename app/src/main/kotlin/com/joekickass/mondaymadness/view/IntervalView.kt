@@ -1,4 +1,4 @@
-package com.joekickass.mondaymadness.intervaltimer
+package com.joekickass.mondaymadness.view
 
 import android.content.Context
 import android.graphics.Canvas
@@ -6,9 +6,9 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
-
-import com.joekickass.mondaymadness.R.styleable.IntervalTimerView
+import com.joekickass.mondaymadness.R.styleable.IntervalView
 import com.joekickass.mondaymadness.R.styleable.*
+
 import com.joekickass.mondaymadness.model.Timer
 
 /**
@@ -20,7 +20,7 @@ import com.joekickass.mondaymadness.model.Timer
  * Thanks to Antimonit for the idea behind this class.
  * http://stackoverflow.com/a/27293082
  */
-class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, attrs) {
+class IntervalView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var mTimer = Timer(0, {})
 
@@ -34,19 +34,19 @@ class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, a
 
     init {
         // Read attributes
-        val a = context.theme.obtainStyledAttributes(attrs, IntervalTimerView, 0, 0)
+        val a = context.theme.obtainStyledAttributes(attrs, IntervalView, 0, 0)
         try {
 
             // the style of the background
-            val bgColor = a.getColor(IntervalTimerView_color_background, 0)
+            val bgColor = a.getColor(IntervalView_color_background, 0)
             setPaintProperties(mBackgroundPaint, bgColor)
 
             // the style of the 'progress'
-            val progressColor = a.getColor(IntervalTimerView_color_progress, 0)
+            val progressColor = a.getColor(IntervalView_color_progress, 0)
             setPaintProperties(mProgressPaint, progressColor)
 
             // the style for the text in the middle
-            val textColor = a.getColor(IntervalTimerView_color_text, 0)
+            val textColor = a.getColor(IntervalView_color_text, 0)
             mTextOffset = setTextProperties(mTextPaint, textColor, RADIUS)
 
         } finally {
