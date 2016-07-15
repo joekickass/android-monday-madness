@@ -15,7 +15,7 @@ import java.lang.Double.toString
  * series of intervals would probably be lagging a bit since the new timer won't start until the
  * view is finished with the last interval timer. I might need to rework this a bit later =)
  */
-class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockWrapper()) {
+class Timer(val timeInMillis: Long, val notifyFinished: () -> Unit, val clock: ISystemClock = Timer.SystemClockWrapper()) {
 
     private var state: State = State.INITIALIZED
     private var startTimeInMillis: Long = 0
@@ -27,33 +27,42 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
         timeLeftInMillis = timeInMillis
     }
 
-    fun start() {
-        if (isRunning) return
+    fun start(): Timer {
+        if (isRunning) return this
         if (isFinished) throw IllegalStateException("Timer already finished")
 
         startTimeInMillis = clock.elapsedRealtime()
         if (isPaused) startTimeInMillis -= timeInMillis - timeLeftInMillis
 
         state = State.RUNNING
+
+        return this
     }
 
-    fun pause() {
-        if (isInitialized) return
-        if (isPaused) return
+    fun pause(): Timer {
+        if (isInitialized) return this
+        if (isPaused) return this
         if (isFinished) throw IllegalStateException("Timer already finished")
 
         startTimeInMillis = 0
 
         state = State.PAUSED
+
+        return this
     }
 
-    fun finish() {
+    private fun finish(): Timer {
         startTimeInMillis = 0
         timeLeftInMillis = 0
+
         state = State.FINISHED
+
+        notifyFinished()
+
+        return this
     }
 
-    fun tick() {
+    fun tick(): Timer {
         // Calculate new progress only if we're running, else keep the old value...
         if (isRunning) {
             timeLeftInMillis = timeInMillis - (clock.elapsedRealtime() - startTimeInMillis)
@@ -63,6 +72,8 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
         if (timeLeftInMillis <= 0) {
             finish()
         }
+
+        return this
     }
 
     val isRunning: Boolean

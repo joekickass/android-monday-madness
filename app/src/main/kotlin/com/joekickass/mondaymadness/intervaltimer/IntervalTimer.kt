@@ -21,13 +21,13 @@ class IntervalTimer(private val view: IntervalTimerView,
 
     private val workout = Workout(workInMillis, restInMillis, repetitions)
 
-    private var timer = Timer(workout.time)
+    private var timer = Timer(workout.time, { intervalFinished() })
 
     // TODO: Create special notifier/listener class with thread handling?
     private val mListeners = mutableListOf<IntervalTimerListener>()
 
     init {
-        view.init(timer, { intervalFinished() })
+        view.init(timer)
     }
 
     fun start() {
@@ -60,8 +60,8 @@ class IntervalTimer(private val view: IntervalTimerView,
         // Start new if there are any intervals left
         if (workout.hasNext()) {
             workout.next()
-            timer = Timer(workout.time)
-            view.init(timer, { intervalFinished() })
+            timer = Timer(workout.time, { intervalFinished() })
+            view.init(timer)
             view.start()
         } else {
             for (listener in mListeners) {

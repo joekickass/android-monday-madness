@@ -13,27 +13,22 @@ import com.joekickass.mondaymadness.model.Timer
 
 /**
  * A graphical visualization of a interval timer (countdown timer)
-
+ *
  * To set a new interval, call [.init] with the desired interval time in ms.
  * To start the new interval, call [.start]. The view will handle countdown internally.
-
- * TODO: When a interval is finished, the [Callback.onIntervalFinished] callback is invoked.
-
+ *
  * Thanks to Antimonit for the idea behind this class.
  * http://stackoverflow.com/a/27293082
  */
 class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-    private var mTimer = Timer(0)
+    private var mTimer = Timer(0, {})
 
     // Internal
     private val mBackgroundPaint = Paint()
     private val mProgressPaint = Paint()
     private val mTextPaint = Paint()
     private val mCircleBounds = RectF()
-
-    // TODO: Remove me
-    private var mNotifyFinished : () -> Unit = {}
 
     private var mTextOffset: Float = 0.toFloat()
 
@@ -59,9 +54,8 @@ class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, a
         }
     }
 
-    fun init(timer: Timer, notifyFinished : () -> Unit) {
+    fun init(timer: Timer) {
         mTimer = timer
-        mNotifyFinished = notifyFinished
         postInvalidateOnAnimation()
     }
 
@@ -103,7 +97,6 @@ class IntervalTimerView(context: Context, attrs: AttributeSet) : View(context, a
 
         if (mTimer.isFinished) {
             postInvalidateOnAnimation()
-            mNotifyFinished()
             return
         }
 
