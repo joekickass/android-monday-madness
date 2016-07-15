@@ -12,7 +12,7 @@ open class Event<T> {
         handlers += handler
     }
 
-    fun emit(event: T) {
+    fun signal(event: T) {
         for (subscriber in handlers) {
             subscriber(event)
         }

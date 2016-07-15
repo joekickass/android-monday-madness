@@ -16,17 +16,17 @@ class IntervalTimer(private val view: IntervalView,
 
     class WorkFinishedEvent {
         companion object : Event<WorkFinishedEvent>()
-        fun emit() = Companion.emit(this)
+        fun signal() = Companion.signal(this)
     }
 
     class RestFinishedEvent {
         companion object : Event<RestFinishedEvent>()
-        fun emit() = Companion.emit(this)
+        fun signal() = Companion.signal(this)
     }
 
     class WorkoutFinishedEvent {
         companion object : Event<WorkoutFinishedEvent>()
-        fun emit() = Companion.emit(this)
+        fun signal() = Companion.signal(this)
     }
 
     private val workout = Workout(workInMillis, restInMillis, repetitions)
@@ -52,8 +52,8 @@ class IntervalTimer(private val view: IntervalView,
     private fun intervalFinished() {
 
         // Notify listeners
-        if (workout.work) WorkFinishedEvent().emit()
-        if (workout.rest) RestFinishedEvent().emit()
+        if (workout.work) WorkFinishedEvent().signal()
+        if (workout.rest) RestFinishedEvent().signal()
 
         // Start new if there are any intervals left
         if (workout.hasNextInterval()) {
@@ -62,7 +62,7 @@ class IntervalTimer(private val view: IntervalView,
             view.init(timer)
             view.start()
         } else {
-            WorkoutFinishedEvent().emit()
+            WorkoutFinishedEvent().signal()
         }
     }
 }

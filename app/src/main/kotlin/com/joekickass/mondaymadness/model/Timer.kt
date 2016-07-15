@@ -21,13 +21,13 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
 
     class IntervalFinishedEvent {
         companion object : Event<IntervalFinishedEvent>()
-        fun emit() = Companion.emit(this)
+        fun signal() = Companion.signal(this)
     }
 
     private var startTimeInMillis: Long = 0
     private var timeLeftInMillis: Long = 0
     private var state: State by observable(INITIALIZED) { prop, old, new ->
-        if (new == FINISHED) IntervalFinishedEvent().emit()
+        if (new == FINISHED) IntervalFinishedEvent().signal()
     }
 
     init {
