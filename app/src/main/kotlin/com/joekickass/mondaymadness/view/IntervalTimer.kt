@@ -1,5 +1,6 @@
 package com.joekickass.mondaymadness.view
 
+import com.joekickass.mondaymadness.model.Event
 import com.joekickass.mondaymadness.model.Timer
 import com.joekickass.mondaymadness.model.Workout
 
@@ -13,21 +14,28 @@ class IntervalTimer(private val view: IntervalView,
                     restInMillis: Long,
                     repetitions: Int) {
 
-    interface IntervalTimerListener {
-        fun onWorkFinished()
-        fun onRestFinished()
-        fun onIntervalTimerFinished()
+    class WorkFinishedEvent {
+        companion object : Event<WorkFinishedEvent>()
+        fun emit() = Companion.emit(this)
+    }
+
+    class RestFinishedEvent {
+        companion object : Event<RestFinishedEvent>()
+        fun emit() = Companion.emit(this)
+    }
+
+    class WorkoutFinishedEvent {
+        companion object : Event<WorkoutFinishedEvent>()
+        fun emit() = Companion.emit(this)
     }
 
     private val workout = Workout(workInMillis, restInMillis, repetitions)
 
-    private var timer = Timer(workout.time, { intervalFinished() })
-
-    // TODO: Create special notifier/listener class with thread handling?
-    private val mListeners = mutableListOf<IntervalTimerListener>()
+    private var timer = Timer(workout.time)
 
     init {
         view.init(timer)
+        Timer.IntervalFinishedEvent on { intervalFinished() }
     }
 
     fun start() {
@@ -41,32 +49,20 @@ class IntervalTimer(private val view: IntervalView,
     val isRunning: Boolean
         get() = timer.isRunning
 
-    fun addListener(listener: IntervalTimerListener) {
-        mListeners.add(listener)
-    }
-
-    fun removeListener(listener: IntervalTimerListener) {
-        mListeners.remove(listener)
-    }
-
     private fun intervalFinished() {
 
         // Notify listeners
-        for (listener in mListeners) {
-            if (workout.work) listener.onWorkFinished()
-            if (workout.rest) listener.onRestFinished()
-        }
+        if (workout.work) WorkFinishedEvent().emit()
+        if (workout.rest) RestFinishedEvent().emit()
 
         // Start new if there are any intervals left
-        if (workout.hasNext()) {
-            workout.next()
-            timer = Timer(workout.time, { intervalFinished() })
+        if (workout.hasNextInterval()) {
+            workout.nextInterval()
+            timer = Timer(workout.time)
             view.init(timer)
             view.start()
         } else {
-            for (listener in mListeners) {
-                listener.onIntervalTimerFinished()
-            }
+            WorkoutFinishedEvent().emit()
         }
     }
 }

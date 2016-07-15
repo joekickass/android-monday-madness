@@ -40,11 +40,11 @@ class Workout(val workInMillis: Long, val restInMillis: Long, repetitions: Int =
     val time : Long
         get() = current.time
 
-    fun hasNext() : Boolean {
+    fun hasNextInterval() : Boolean {
         return iter.hasNext()
     }
 
-    fun next() : Workout {
+    fun nextInterval() : Workout {
         current = iter.next()
         return this
     }

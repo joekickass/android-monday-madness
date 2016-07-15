@@ -37,7 +37,7 @@ import kotlinx.android.synthetic.main.activity_main.*
  * intervals will be added to Realm, and [MadnessActivity] will be notified through
  * [RealmChangeListener].
  */
-class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener, RealmChangeListener<Realm> {
+class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
     private var mFacade: SpotifyFacade? = null
 
@@ -62,6 +62,10 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
         val realm = Realm.getDefaultInstance()
         realm.addChangeListener(this)
 
+        IntervalTimer.WorkFinishedEvent on { onWorkFinished() }
+        IntervalTimer.RestFinishedEvent on { onRestFinished() }
+        IntervalTimer.WorkoutFinishedEvent on { onWorkoutFinished() }
+
         setNewInterval()
 
         startSpotifyAuth()
@@ -75,7 +79,6 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
     }
 
     private fun setNewInterval() {
-        mTimer?.removeListener(this)
         val interval = lastInterval
         Log.d(TAG, "Setting new interval: w=" + interval.workInMillis +
                    " r=" + interval.restInMillis +
@@ -84,13 +87,11 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
                 interval.workInMillis,
                 interval.restInMillis,
                 interval.repetitions)
-        mTimer?.addListener(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Spotify.destroyPlayer(this)
-        mTimer?.removeListener(this)
         val realm = Realm.getDefaultInstance()
         realm.removeChangeListener(this)
         realm.close()
@@ -131,18 +132,18 @@ class MadnessActivity : AppCompatActivity(), IntervalTimer.IntervalTimerListener
         }
     }
 
-    override fun onRestFinished() {
+    fun onRestFinished() {
         Log.d(TAG, "onRestFinished")
         mFacade!!.toggle()
     }
 
-    override fun onWorkFinished() {
+    fun onWorkFinished() {
         Log.d(TAG, "onWorkFinished")
         mFacade!!.toggle()
     }
 
-    override fun onIntervalTimerFinished() {
-        Log.d(TAG, "onIntervalTimerFinished")
+    fun onWorkoutFinished() {
+        Log.d(TAG, "onWorkoutFinished")
         mFacade!!.stop()
         setNewInterval()
         fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)

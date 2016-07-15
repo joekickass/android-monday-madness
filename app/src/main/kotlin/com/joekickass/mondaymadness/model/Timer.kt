@@ -1,7 +1,9 @@
 package com.joekickass.mondaymadness.model
 
 import android.os.SystemClock
+import com.joekickass.mondaymadness.model.Timer.State.*
 import java.lang.Double.toString
+import kotlin.properties.Delegates.observable
 
 /**
  * Countdown timer that counts down at irregular intervals (ticks).
@@ -15,11 +17,18 @@ import java.lang.Double.toString
  * series of intervals would probably be lagging a bit since the new timer won't start until the
  * view is finished with the last interval timer. I might need to rework this a bit later =)
  */
-class Timer(val timeInMillis: Long, val notifyFinished: () -> Unit, val clock: ISystemClock = Timer.SystemClockWrapper()) {
+class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockWrapper()) {
 
-    private var state: State = State.INITIALIZED
+    class IntervalFinishedEvent {
+        companion object : Event<IntervalFinishedEvent>()
+        fun emit() = Companion.emit(this)
+    }
+
     private var startTimeInMillis: Long = 0
     private var timeLeftInMillis: Long = 0
+    private var state: State by observable(INITIALIZED) { prop, old, new ->
+        if (new == FINISHED) IntervalFinishedEvent().emit()
+    }
 
     init {
         if (timeInMillis < 0L) throw IllegalArgumentException("Argument must not be less than zero")
@@ -34,7 +43,7 @@ class Timer(val timeInMillis: Long, val notifyFinished: () -> Unit, val clock: I
         startTimeInMillis = clock.elapsedRealtime()
         if (isPaused) startTimeInMillis -= timeInMillis - timeLeftInMillis
 
-        state = State.RUNNING
+        state = RUNNING
 
         return this
     }
@@ -46,7 +55,7 @@ class Timer(val timeInMillis: Long, val notifyFinished: () -> Unit, val clock: I
 
         startTimeInMillis = 0
 
-        state = State.PAUSED
+        state = PAUSED
 
         return this
     }
@@ -55,9 +64,7 @@ class Timer(val timeInMillis: Long, val notifyFinished: () -> Unit, val clock: I
         startTimeInMillis = 0
         timeLeftInMillis = 0
 
-        state = State.FINISHED
-
-        notifyFinished()
+        state = FINISHED
 
         return this
     }
@@ -77,16 +84,16 @@ class Timer(val timeInMillis: Long, val notifyFinished: () -> Unit, val clock: I
     }
 
     val isRunning: Boolean
-        get() = state == State.RUNNING
+        get() = state == RUNNING
 
     val isPaused: Boolean
-        get() = state == State.PAUSED
+        get() = state == PAUSED
 
     val isInitialized: Boolean
-        get() = state == State.INITIALIZED
+        get() = state == INITIALIZED
 
     val isFinished: Boolean
-        get() = state == State.FINISHED
+        get() = state == FINISHED
 
     val text: String
         get() = toString( (timeLeftInMillis / 100).toDouble() / 10 )
@@ -97,7 +104,7 @@ class Timer(val timeInMillis: Long, val notifyFinished: () -> Unit, val clock: I
     /**
      * Possible timer states
      */
-    private enum class State {
+    internal enum class State {
         FINISHED, INITIALIZED, RUNNING, PAUSED
     }
 

@@ -71,7 +71,7 @@ class WorkoutTest {
     @Test
     fun WorkoutWith1RepetitionShouldHave1RestIntervalAfterWorkInterval() {
         val workout = Workout(10, 10, 1)
-        workout.next()
+        workout.nextInterval()
         Assert.assertTrue(workout.rest)
     }
 
@@ -83,28 +83,28 @@ class WorkoutTest {
     @Test
     fun ItIsPossibleToCheckIfThereAreMoreIntervals() {
         val workout = Workout(10, 10, 3)
-        Assert.assertTrue(workout.next().next().hasNext())
+        Assert.assertTrue(workout.nextInterval().nextInterval().hasNextInterval())
     }
 
     @Test
     fun NoMoreIntervalsAfterLastDuh() {
         val workout = Workout(10, 10, 3)
-        Assert.assertFalse(workout.next().next().next().next().next().hasNext())
+        Assert.assertFalse(workout.nextInterval().nextInterval().nextInterval().nextInterval().nextInterval().hasNextInterval())
     }
 
     @Test
     fun TryingToGetMoreIntervalsThanExistIsNotAllowed() {
         exception.expect(NoSuchElementException::class.java)
         val workout = Workout(10, 10, 3)
-        workout.next().next().next().next().next().next()
+        workout.nextInterval().nextInterval().nextInterval().nextInterval().nextInterval().nextInterval()
     }
 
     @Test
     fun AllWorkIntervalsShouldHaveCorrectTime() {
         val workout = Workout(15, 20, 3)
         val work1 = workout.time
-        val work2 = workout.next().next().time
-        val work3 = workout.next().next().time
+        val work2 = workout.nextInterval().nextInterval().time
+        val work3 = workout.nextInterval().nextInterval().time
         val arr = listOf(work1, work2, work3)
         Assert.assertTrue(arr.all { it == 15L })
     }
@@ -112,9 +112,9 @@ class WorkoutTest {
     @Test
     fun AllRestIntervalsShouldHaveCorrectTime() {
         val workout = Workout(10, 20, 3)
-        val rest1 = workout.next().time
-        val rest2 = workout.next().next().time
-        val rest3 = workout.next().next().time
+        val rest1 = workout.nextInterval().time
+        val rest2 = workout.nextInterval().nextInterval().time
+        val rest3 = workout.nextInterval().nextInterval().time
         val arr = listOf(rest1, rest2, rest3)
         Assert.assertTrue(arr.all { it == 20L })
     }

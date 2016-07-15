@@ -22,7 +22,7 @@ import com.joekickass.mondaymadness.model.Timer
  */
 class IntervalView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-    private var mTimer = Timer(0, {})
+    private var mTimer = Timer(0)
 
     // Internal
     private val mBackgroundPaint = Paint()
