@@ -15,8 +15,8 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.0.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile 'com.android.support:design:24.0.0'
-    compile 'com.spotify.sdk:spotify-auth:1.0.0-beta11@aar'
-    compile 'com.spotify.sdk:spotify-player:1.0.0-beta11@aar'
+    compile 'com.spotify.sdk:spotify-auth:1.0.0-beta13@aar'
+    compile 'com.spotify.sdk:spotify-player:1.0.0-beta13@aar'
     testCompile 'junit:junit:4.12'
 }
 
