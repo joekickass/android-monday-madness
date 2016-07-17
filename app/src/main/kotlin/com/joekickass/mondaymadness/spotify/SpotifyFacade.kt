@@ -12,43 +12,40 @@ import com.spotify.sdk.android.player.PlayerState
  *
  * Simplifies interaction with [com.spotify.sdk.android.player.Player]
  */
-class SpotifyFacade(private val player : Player) : ConnectionStateCallback, PlayerNotificationCallback {
+class SpotifyFacade() : ConnectionStateCallback, PlayerNotificationCallback {
 
     private val TAG = SpotifyFacade::class.java.simpleName
 
-    private var lastKnownState: PlayerState? = null
+    private var player : Player? = null
 
-    init {
+    val isEnabled : Boolean
+        get() = player != null
+
+    fun setPlayer(player: Player) {
         Log.d(TAG, "init")
         player.addConnectionStateCallback(this)
         player.addPlayerNotificationCallback(this)
+        this.player = player
     }
 
     fun toggle() {
         Log.d(TAG, "toggle")
-        when {
-            // TODO: Start as well
-            lastKnownState == null -> player.getPlayerState { state -> lastKnownState = state }
-            lastKnownState!!.playing -> player.pause()
-            else -> player.resume()
+        player?.getPlayerState { state ->
+            when {
+                state.trackUri == null -> player?.play(PLAYLIST_URI)
+                state.playing -> player?.pause()
+                !state.playing -> player?.resume()
+            }
         }
-    }
-
-    private fun start() {
-        Log.d(TAG, "start")
-        player.play(PLAYLIST_URI)
-        player.setShuffle(true)
     }
 
     fun stop() {
         Log.d(TAG, "stop")
-        player.pause()
-        lastKnownState = null
+        player?.pause()
     }
 
     override fun onPlaybackEvent(eventType: PlayerNotificationCallback.EventType, playerState: PlayerState) {
         Log.d(TAG, "onPlaybackEvent")
-        lastKnownState = playerState
     }
 
     override fun onPlaybackError(errorType: PlayerNotificationCallback.ErrorType, s: String) {

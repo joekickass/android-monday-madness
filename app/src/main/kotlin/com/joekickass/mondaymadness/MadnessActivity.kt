@@ -9,19 +9,10 @@ import android.view.MenuItem
 
 import com.joekickass.mondaymadness.menu.about.AboutActivity
 import com.joekickass.mondaymadness.menu.interval.AddIntervalDialogFragment
-import com.joekickass.mondaymadness.view.IntervalTimer
+import com.joekickass.mondaymadness.view.IntervalViewController
 import com.joekickass.mondaymadness.view.IntervalView
 import com.joekickass.mondaymadness.realm.Interval
-import com.joekickass.mondaymadness.spotify.CLIENT_ID
-import com.joekickass.mondaymadness.spotify.REDIRECT_URI
-import com.joekickass.mondaymadness.spotify.REQUEST_CODE
 import com.joekickass.mondaymadness.spotify.SpotifyFacade
-import com.spotify.sdk.android.authentication.AuthenticationClient
-import com.spotify.sdk.android.authentication.AuthenticationRequest
-import com.spotify.sdk.android.authentication.AuthenticationResponse
-import com.spotify.sdk.android.player.Config
-import com.spotify.sdk.android.player.Player
-import com.spotify.sdk.android.player.Spotify
 
 import io.realm.Realm
 import io.realm.RealmChangeListener
@@ -32,29 +23,30 @@ import kotlinx.android.synthetic.main.activity_main.*
 /**
  * Main entry point for app
  *
- * Inflates the [IntervalView] and connects it to its [IntervalTimer]
+ * Inflates the [IntervalView] and connects it to its [IntervalViewController]
  * controller. Also delegates adding a new interval to the [AddIntervalDialogFragment]. New
  * intervals will be added to Realm, and [MadnessActivity] will be notified through
  * [RealmChangeListener].
  */
 class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
-    private var mFacade: SpotifyFacade? = null
+    private var spotify : SpotifyFacade? = null
 
-    private var mTimer: IntervalTimer? = null
+    private var mViewController: IntervalViewController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        fab.isEnabled = false
         fab.setOnClickListener {
-            mFacade!!.toggle()
-            if (mTimer?.isRunning == true) {
-                mTimer?.pause()
+
+            if (mViewController?.isRunning == true) {
+                mViewController?.pause()
+                spotify?.toggle()
                 fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
             } else {
-                mTimer?.start()
+                mViewController?.start()
+                spotify?.toggle()
                 fab.setImageResource(R.drawable.ic_pause_white_48dp)
             }
         }
@@ -62,20 +54,13 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         val realm = Realm.getDefaultInstance()
         realm.addChangeListener(this)
 
-        IntervalTimer.WorkFinishedEvent on { onWorkFinished() }
-        IntervalTimer.RestFinishedEvent on { onRestFinished() }
-        IntervalTimer.WorkoutFinishedEvent on { onWorkoutFinished() }
+        spotify = application.getSystemService("SpotifyService") as SpotifyFacade
 
-        setNewInterval()
+        IntervalViewController.WorkFinishedEvent on { onWorkFinished() }
+        IntervalViewController.RestFinishedEvent on { onRestFinished() }
+        IntervalViewController.WorkoutFinishedEvent on { onWorkoutFinished() }
 
-        startSpotifyAuth()
-    }
-
-    private fun startSpotifyAuth() {
-        val request = AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI)
-                .setScopes(arrayOf("user-read-private", "playlist-read", "playlist-read-private", "streaming"))
-                .build()
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request)
+        //setNewInterval()
     }
 
     private fun setNewInterval() {
@@ -83,7 +68,7 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         Log.d(TAG, "Setting new interval: w=" + interval.workInMillis +
                    " r=" + interval.restInMillis +
                    " reps=" + interval.repetitions)
-        mTimer = IntervalTimer(pwv,
+        mViewController = IntervalViewController(pwv,
                 interval.workInMillis,
                 interval.restInMillis,
                 interval.repetitions)
@@ -91,7 +76,6 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
     override fun onDestroy() {
         super.onDestroy()
-        Spotify.destroyPlayer(this)
         val realm = Realm.getDefaultInstance()
         realm.removeChangeListener(this)
         realm.close()
@@ -107,7 +91,7 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         when (item.itemId) {
 
             R.id.action_reset -> {
-                mFacade!!.stop()
+                spotify?.stop()
                 setNewInterval()
                 return true
             }
@@ -134,17 +118,17 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
     fun onRestFinished() {
         Log.d(TAG, "onRestFinished")
-        mFacade!!.toggle()
+        spotify?.toggle()
     }
 
     fun onWorkFinished() {
         Log.d(TAG, "onWorkFinished")
-        mFacade!!.toggle()
+        spotify?.toggle()
     }
 
     fun onWorkoutFinished() {
         Log.d(TAG, "onWorkoutFinished")
-        mFacade!!.stop()
+        spotify?.stop()
         setNewInterval()
         fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
     }
@@ -159,51 +143,6 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
     override fun onChange(realm: Realm) {
         Log.d(TAG, "Setting up new interval")
         setNewInterval()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        super.onActivityResult(requestCode, resultCode, intent)
-
-        if (requestCode == REQUEST_CODE) {
-
-            val response = AuthenticationClient.getResponse(resultCode, intent)
-            when (response.type) {
-                AuthenticationResponse.Type.TOKEN -> handleLoginSuccess(response.accessToken)
-                AuthenticationResponse.Type.ERROR -> handleLoginError(response.error)
-                else -> handleLoginInterrupted()
-            }
-        }
-    }
-
-    private fun handleLoginSuccess(token: String) {
-        Log.d(TAG, "Authenticated with Spotify, initializing player...")
-
-        val playerConfig = Config(this, token, CLIENT_ID)
-        Spotify.getPlayer(playerConfig, this, object : Player.InitializationObserver {
-
-            override fun onInitialized(player: Player) {
-                Log.d(TAG, "Spotify player initialized")
-                mFacade = SpotifyFacade(player)
-                fab.isEnabled = true
-            }
-
-            override fun onError(throwable: Throwable) {
-                Log.e(TAG, "Could not initialize Spotify player: " + throwable.message)
-                TODO()
-            }
-        })
-    }
-
-    private fun handleLoginError(error: String) {
-        Log.e(TAG, "Failed to authenticate with Spotify: " + error)
-        Log.d(TAG, "Clearing cookies and retrying...")
-        //TODO: Readd when new release of Spotify SDK is available: AuthenticationClient.clearCookies(this)
-        startSpotifyAuth()
-    }
-
-    private fun handleLoginInterrupted() {
-        Log.d(TAG, "Most likely auth flow cancelled or interrupted, try again...")
-        startSpotifyAuth()
     }
 
     companion object {

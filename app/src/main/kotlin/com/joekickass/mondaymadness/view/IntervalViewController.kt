@@ -9,10 +9,10 @@ import com.joekickass.mondaymadness.model.Workout
  *
  * TODO: Refactor me!
  */
-class IntervalTimer(private val view: IntervalView,
-                    workInMillis: Long,
-                    restInMillis: Long,
-                    repetitions: Int) {
+class IntervalViewController(private val view: IntervalView,
+                             workInMillis: Long,
+                             restInMillis: Long,
+                             repetitions: Int) {
 
     class WorkFinishedEvent {
         companion object : Event<WorkFinishedEvent>()
