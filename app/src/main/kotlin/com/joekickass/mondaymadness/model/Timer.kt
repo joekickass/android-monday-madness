@@ -19,6 +19,16 @@ import kotlin.properties.Delegates.observable
  */
 class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockWrapper()) {
 
+    class IntervalRunningEvent {
+        companion object : Event<IntervalRunningEvent>()
+        fun signal() = Companion.signal(this)
+    }
+
+    class IntervalPausedEvent {
+        companion object : Event<IntervalPausedEvent>()
+        fun signal() = Companion.signal(this)
+    }
+
     class IntervalFinishedEvent {
         companion object : Event<IntervalFinishedEvent>()
         fun signal() = Companion.signal(this)
@@ -27,6 +37,8 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
     private var startTimeInMillis: Long = 0
     private var timeLeftInMillis: Long = 0
     private var state: State by observable(INITIALIZED) { prop, old, new ->
+        if (new == RUNNING) IntervalRunningEvent().signal()
+        if (new == PAUSED) IntervalPausedEvent().signal()
         if (new == FINISHED) IntervalFinishedEvent().signal()
     }
 

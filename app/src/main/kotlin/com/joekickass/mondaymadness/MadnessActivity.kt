@@ -39,15 +39,10 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         setContentView(R.layout.activity_main)
 
         fab.setOnClickListener {
-
             if (mViewController?.isRunning == true) {
                 mViewController?.pause()
-                spotify?.toggle()
-                fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
             } else {
                 mViewController?.start()
-                spotify?.toggle()
-                fab.setImageResource(R.drawable.ic_pause_white_48dp)
             }
         }
 
@@ -55,6 +50,12 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         realm.addChangeListener(this)
 
         spotify = application.getSystemService("SpotifyService") as SpotifyFacade
+
+        IntervalViewController.WorkRunningEvent on { onRunning() }
+        IntervalViewController.RestRunningEvent on { onRunning() }
+
+        IntervalViewController.WorkPausedEvent on { onPaused() }
+        IntervalViewController.RestPausedEvent on { onPaused() }
 
         IntervalViewController.WorkFinishedEvent on { onWorkFinished() }
         IntervalViewController.RestFinishedEvent on { onRestFinished() }
@@ -114,6 +115,14 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
             else -> return super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun onRunning() {
+        fab.setImageResource(R.drawable.ic_pause_white_48dp)
+    }
+
+    private fun onPaused() {
+        fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
     }
 
     fun onRestFinished() {

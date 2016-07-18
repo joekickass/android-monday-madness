@@ -53,6 +53,16 @@ class TimerTest {
     }
 
     @Test
+    fun startingATimerSignalsRunningEvent() {
+        var called = false
+        Timer.IntervalRunningEvent on { called = true}
+        Assert.assertFalse(called)
+
+        Timer(10, ClockMock()).start()
+        Assert.assertTrue(called)
+    }
+
+    @Test
     fun startingTimerTwiceDoesNothing() {
         val timer = Timer(10, ClockMock())
         timer.start()
@@ -83,12 +93,33 @@ class TimerTest {
     }
 
     @Test
+    fun pausingATimerSignalsPausedEvent() {
+        var called = false
+        Timer.IntervalPausedEvent on { called = true}
+        Assert.assertFalse(called)
+
+        Timer(10, ClockMock()).start().pause()
+        Assert.assertTrue(called)
+    }
+
+    @Test
     fun resumingAPausedTimerPutsItInRunningState() {
         val timer = Timer(10, ClockMock(listOf(0, 5)))
         timer.start()
         timer.pause()
         timer.start()
         Assert.assertTrue(timer.isRunning)
+    }
+
+    @Test
+    fun resumingAPausedTimerSignalsRunningEvent() {
+        var called = false
+        Timer.IntervalRunningEvent on { called = true }
+        val timer = Timer(10, ClockMock(listOf(0, 5))).start().pause()
+        called = false
+
+        timer.start()
+        Assert.assertTrue(called)
     }
 
     @Test

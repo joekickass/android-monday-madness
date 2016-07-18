@@ -14,8 +14,28 @@ class IntervalViewController(private val view: IntervalView,
                              restInMillis: Long,
                              repetitions: Int) {
 
+    class WorkRunningEvent {
+        companion object : Event<WorkRunningEvent>()
+        fun signal() = Companion.signal(this)
+    }
+
+    class WorkPausedEvent {
+        companion object : Event<WorkPausedEvent>()
+        fun signal() = Companion.signal(this)
+    }
+
     class WorkFinishedEvent {
         companion object : Event<WorkFinishedEvent>()
+        fun signal() = Companion.signal(this)
+    }
+
+    class RestRunningEvent {
+        companion object : Event<RestRunningEvent>()
+        fun signal() = Companion.signal(this)
+    }
+
+    class RestPausedEvent {
+        companion object : Event<RestPausedEvent>()
         fun signal() = Companion.signal(this)
     }
 
@@ -35,7 +55,10 @@ class IntervalViewController(private val view: IntervalView,
 
     init {
         view.init(timer)
+        Timer.IntervalRunningEvent on { intervalRunning() }
+        Timer.IntervalPausedEvent on { intervalPaused() }
         Timer.IntervalFinishedEvent on { intervalFinished() }
+
     }
 
     fun start() {
@@ -48,6 +71,17 @@ class IntervalViewController(private val view: IntervalView,
 
     val isRunning: Boolean
         get() = timer.isRunning
+
+
+    private fun intervalRunning() {
+        if (workout.work) WorkRunningEvent().signal()
+        if (workout.rest) RestRunningEvent().signal()
+    }
+
+    private fun intervalPaused() {
+        if (workout.work) WorkPausedEvent().signal()
+        if (workout.rest) RestPausedEvent().signal()
+    }
 
     private fun intervalFinished() {
 
