@@ -15,31 +15,31 @@ import kotlin.properties.Delegates.observable
  * As a consequence, the timer is not particularly exact. The impact on a single interval is
  * irrelevant, since the view cannot draw itself any faster than it already is. However, a long
  * series of intervals would probably be lagging a bit since the new timer won't start until the
- * view is finished with the last interval timer. I might need to rework this a bit later =)
+ * view is finished with the last timer. I might need to rework this a bit later =)
  */
 class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockWrapper()) {
 
-    class IntervalRunningEvent {
-        companion object : Event<IntervalRunningEvent>()
+    class TimerRunningEvent {
+        companion object : Event<TimerRunningEvent>()
         fun signal() = Companion.signal(this)
     }
 
-    class IntervalPausedEvent {
-        companion object : Event<IntervalPausedEvent>()
+    class TimerPausedEvent {
+        companion object : Event<TimerPausedEvent>()
         fun signal() = Companion.signal(this)
     }
 
-    class IntervalFinishedEvent {
-        companion object : Event<IntervalFinishedEvent>()
+    class TimerFinishedEvent {
+        companion object : Event<TimerFinishedEvent>()
         fun signal() = Companion.signal(this)
     }
 
     private var startTimeInMillis: Long = 0
     private var timeLeftInMillis: Long = 0
     private var state: State by observable(INITIALIZED) { prop, old, new ->
-        if (new == RUNNING) IntervalRunningEvent().signal()
-        if (new == PAUSED) IntervalPausedEvent().signal()
-        if (new == FINISHED) IntervalFinishedEvent().signal()
+        if (new == RUNNING) TimerRunningEvent().signal()
+        if (new == PAUSED) TimerPausedEvent().signal()
+        if (new == FINISHED) TimerFinishedEvent().signal()
     }
 
     init {

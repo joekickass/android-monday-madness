@@ -32,7 +32,7 @@ class TimerTest {
     @Test
     fun newTimerWithZeroIntervalNotifiesCallback() {
         var called = false
-        Timer.IntervalFinishedEvent on { called = true}
+        Timer.TimerFinishedEvent on { called = true}
         Assert.assertFalse(called)
 
         Timer(0)
@@ -55,7 +55,7 @@ class TimerTest {
     @Test
     fun startingATimerSignalsRunningEvent() {
         var called = false
-        Timer.IntervalRunningEvent on { called = true}
+        Timer.TimerRunningEvent on { called = true}
         Assert.assertFalse(called)
 
         Timer(10, ClockMock()).start()
@@ -95,7 +95,7 @@ class TimerTest {
     @Test
     fun pausingATimerSignalsPausedEvent() {
         var called = false
-        Timer.IntervalPausedEvent on { called = true}
+        Timer.TimerPausedEvent on { called = true}
         Assert.assertFalse(called)
 
         Timer(10, ClockMock()).start().pause()
@@ -114,7 +114,7 @@ class TimerTest {
     @Test
     fun resumingAPausedTimerSignalsRunningEvent() {
         var called = false
-        Timer.IntervalRunningEvent on { called = true }
+        Timer.TimerRunningEvent on { called = true }
         val timer = Timer(10, ClockMock(listOf(0, 5))).start().pause()
         called = false
 
@@ -183,7 +183,7 @@ class TimerTest {
     @Test
     fun timerTickCountsDownUntilFinished2() {
         var called = false
-        Timer.IntervalFinishedEvent on { called = true}
+        Timer.TimerFinishedEvent on { called = true}
         Assert.assertFalse(called)
 
         val timer = Timer(10, ClockMock(listOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)))

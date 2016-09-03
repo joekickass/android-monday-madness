@@ -1,51 +1,83 @@
 package com.joekickass.mondaymadness.model
 
-/**
- * A {@link Workout} is a series of {@link Interval}s, either work or rest.
- */
-class Workout(val workInMillis: Long, val restInMillis: Long, repetitions: Int = 1) {
+class Workout (val queue: IntervalQueue) {
 
-    private enum class IntervalType { WORK, REST }
+    class WorkRunningEvent {
+        companion object : Event<WorkRunningEvent>()
+        fun signal() = Companion.signal(this)
+    }
 
-    private data class Interval(val type: IntervalType, val time: Long)
+    class WorkPausedEvent {
+        companion object : Event<WorkPausedEvent>()
+        fun signal() = Companion.signal(this)
+    }
 
-    private val intervals: List<Interval> =
-        (1..repetitions)
-        .flatMap {
-            if (restInMillis == 0L) listOf(Interval(IntervalType.WORK, workInMillis))
-            else listOf(Interval(IntervalType.WORK, workInMillis), Interval(IntervalType.REST, restInMillis))
-        }.toList()
+    class WorkFinishedEvent {
+        companion object : Event<WorkFinishedEvent>()
+        fun signal() = Companion.signal(this)
+    }
 
-    private val iter: ListIterator<Interval> = intervals.listIterator()
+    class RestRunningEvent {
+        companion object : Event<RestRunningEvent>()
+        fun signal() = Companion.signal(this)
+    }
 
-    private var current : Interval
+    class RestPausedEvent {
+        companion object : Event<RestPausedEvent>()
+        fun signal() = Companion.signal(this)
+    }
+
+    class RestFinishedEvent {
+        companion object : Event<RestFinishedEvent>()
+        fun signal() = Companion.signal(this)
+    }
+
+    class WorkoutFinishedEvent {
+        companion object : Event<WorkoutFinishedEvent>()
+        fun signal() = Companion.signal(this)
+    }
+
+    private var timer = Timer(queue.time)
 
     init {
-        if (workInMillis <= 0) throw IllegalArgumentException("Work time must be a positive value")
-        if (restInMillis < 0) throw IllegalArgumentException("Rest time cannot be a negative value")
-        if (restInMillis == 0L && repetitions != 1) throw IllegalArgumentException("Skipping rest only allowed for single interval")
-        if (repetitions < 1) throw IllegalArgumentException("Repetitions must be a positive value")
-        current = iter.next()
+        Timer.TimerRunningEvent on { intervalRunning() }
+        Timer.TimerPausedEvent on { intervalPaused() }
+        Timer.TimerFinishedEvent on { intervalFinished() }
     }
 
-    val count : Int
-        get() = intervals.count()
-
-    val work : Boolean
-        get() = current.type == IntervalType.WORK
-
-    val rest : Boolean
-        get() = current.type == IntervalType.REST
-
-    val time : Long
-        get() = current.time
-
-    fun hasNextInterval() : Boolean {
-        return iter.hasNext()
+    fun start() {
+        timer.start()
     }
 
-    fun nextInterval() : Workout {
-        current = iter.next()
-        return this
+    fun pause() {
+        timer.pause()
+    }
+
+    fun stop() {
+        timer = Timer(queue.time)
+    }
+
+    private fun intervalRunning() {
+        if (queue.work) WorkRunningEvent().signal()
+        if (queue.rest) RestRunningEvent().signal()
+    }
+
+    private fun intervalPaused() {
+        if (queue.work) WorkPausedEvent().signal()
+        if (queue.rest) RestPausedEvent().signal()
+    }
+
+    private fun intervalFinished() {
+        if (queue.work) WorkFinishedEvent().signal()
+        if (queue.rest) RestFinishedEvent().signal()
+
+        // Start new if there are any intervals left
+        if (queue.hasNextInterval()) {
+            queue.nextInterval()
+            timer = Timer(queue.time)
+            start()
+        } else {
+            WorkoutFinishedEvent().signal()
+        }
     }
 }

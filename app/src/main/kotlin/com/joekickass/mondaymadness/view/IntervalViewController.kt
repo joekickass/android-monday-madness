@@ -1,6 +1,7 @@
 package com.joekickass.mondaymadness.view
 
 import com.joekickass.mondaymadness.model.Event
+import com.joekickass.mondaymadness.model.IntervalQueue
 import com.joekickass.mondaymadness.model.Timer
 import com.joekickass.mondaymadness.model.Workout
 
@@ -49,16 +50,15 @@ class IntervalViewController(private val view: IntervalView,
         fun signal() = Companion.signal(this)
     }
 
-    private val workout = Workout(workInMillis, restInMillis, repetitions)
+    private val queue = IntervalQueue(workInMillis, restInMillis, repetitions)
 
-    private var timer = Timer(workout.time)
+    private var timer = Timer(queue.time)
 
     init {
         view.init(timer)
-        Timer.IntervalRunningEvent on { intervalRunning() }
-        Timer.IntervalPausedEvent on { intervalPaused() }
-        Timer.IntervalFinishedEvent on { intervalFinished() }
-
+        Timer.TimerRunningEvent on { intervalRunning() }
+        Timer.TimerPausedEvent on { intervalPaused() }
+        Timer.TimerFinishedEvent on { intervalFinished() }
     }
 
     fun start() {
@@ -74,25 +74,25 @@ class IntervalViewController(private val view: IntervalView,
 
 
     private fun intervalRunning() {
-        if (workout.work) WorkRunningEvent().signal()
-        if (workout.rest) RestRunningEvent().signal()
+        if (queue.work) WorkRunningEvent().signal()
+        if (queue.rest) RestRunningEvent().signal()
     }
 
     private fun intervalPaused() {
-        if (workout.work) WorkPausedEvent().signal()
-        if (workout.rest) RestPausedEvent().signal()
+        if (queue.work) WorkPausedEvent().signal()
+        if (queue.rest) RestPausedEvent().signal()
     }
 
     private fun intervalFinished() {
 
         // Notify listeners
-        if (workout.work) WorkFinishedEvent().signal()
-        if (workout.rest) RestFinishedEvent().signal()
+        if (queue.work) WorkFinishedEvent().signal()
+        if (queue.rest) RestFinishedEvent().signal()
 
         // Start new if there are any intervals left
-        if (workout.hasNextInterval()) {
-            workout.nextInterval()
-            timer = Timer(workout.time)
+        if (queue.hasNextInterval()) {
+            queue.nextInterval()
+            timer = Timer(queue.time)
             view.init(timer)
             view.start()
         } else {
