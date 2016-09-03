@@ -82,7 +82,7 @@ class IntervalView(context: Context, attrs: AttributeSet) : View(context, attrs)
                 centerHeight + RADIUS)
 
         // Not yet started, show empty ring and total time (can be '0.0' if finished)
-        if (mTimer.isFinished || mTimer.isInitialized) {
+        if (mTimer.finished || mTimer.initialized) {
 
             canvas.drawCircle(centerWidth, centerHeight, RADIUS, mBackgroundPaint)
             canvas.drawText(
@@ -95,7 +95,7 @@ class IntervalView(context: Context, attrs: AttributeSet) : View(context, attrs)
 
         mTimer.tick()
 
-        if (mTimer.isFinished) {
+        if (mTimer.finished) {
             postInvalidateOnAnimation()
             return
         }

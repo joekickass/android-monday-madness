@@ -19,11 +19,18 @@ class WorkoutTest {
     @Test
     fun startingWorkoutSessionFiresEvent() {
         var called = false
-        Workout.WorkRunningEvent on { called = true}
+        val workout = Workout(IntervalQueue(10, 10, 1), Timer(10, ClockMock()))
+        workout.onWorkRunning = { called = true}
         Assert.assertFalse(called)
 
-        val session = Workout(IntervalQueue(10, 10, 1))
-        session.start()
+        workout.start()
         Assert.assertTrue(called)
+    }
+
+    private class ClockMock(ticks: List<Long> = listOf(0)) : Timer.ISystemClock {
+        val iter = ticks.listIterator()
+        override fun elapsedRealtime(): Long {
+            return iter.next()
+        }
     }
 }

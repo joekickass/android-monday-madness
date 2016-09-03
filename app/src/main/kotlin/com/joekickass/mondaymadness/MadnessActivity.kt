@@ -9,6 +9,8 @@ import android.view.MenuItem
 
 import com.joekickass.mondaymadness.menu.about.AboutActivity
 import com.joekickass.mondaymadness.menu.interval.AddIntervalDialogFragment
+import com.joekickass.mondaymadness.model.IntervalQueue
+import com.joekickass.mondaymadness.model.Workout
 import com.joekickass.mondaymadness.view.IntervalViewController
 import com.joekickass.mondaymadness.view.IntervalView
 import com.joekickass.mondaymadness.realm.Interval
@@ -39,11 +41,7 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         setContentView(R.layout.activity_main)
 
         fab.setOnClickListener {
-            if (mViewController?.isRunning == true) {
-                mViewController?.pause()
-            } else {
-                mViewController?.start()
-            }
+            mViewController?.onClick()
         }
 
         val realm = Realm.getDefaultInstance()
@@ -51,17 +49,11 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
         spotify = application.getSystemService("SpotifyService") as SpotifyFacade
 
-        IntervalViewController.WorkRunningEvent on { onRunning() }
-        IntervalViewController.RestRunningEvent on { onRunning() }
+        mViewController?.onRunning = { onRunning() }
+        mViewController?.onPaused =  { onPaused() }
+        mViewController?.onFinished = { onFinished() }
 
-        IntervalViewController.WorkPausedEvent on { onPaused() }
-        IntervalViewController.RestPausedEvent on { onPaused() }
-
-        IntervalViewController.WorkFinishedEvent on { onWorkFinished() }
-        IntervalViewController.RestFinishedEvent on { onRestFinished() }
-        IntervalViewController.WorkoutFinishedEvent on { onWorkoutFinished() }
-
-        //setNewInterval()
+        setNewInterval()
     }
 
     private fun setNewInterval() {
@@ -69,10 +61,9 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         Log.d(TAG, "Setting new interval: w=" + interval.workInMillis +
                    " r=" + interval.restInMillis +
                    " reps=" + interval.repetitions)
-        mViewController = IntervalViewController(pwv,
-                interval.workInMillis,
-                interval.restInMillis,
-                interval.repetitions)
+
+        val q = IntervalQueue(interval.workInMillis, interval.restInMillis, interval.repetitions)
+        mViewController = IntervalViewController(pwv, Workout(q))
     }
 
     override fun onDestroy() {
@@ -118,25 +109,19 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
     }
 
     private fun onRunning() {
+        Log.d(TAG, "onRunning")
+        spotify?.play()
         fab.setImageResource(R.drawable.ic_pause_white_48dp)
     }
 
     private fun onPaused() {
+        Log.d(TAG, "onPaused")
+        spotify?.stop()
         fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
     }
 
-    fun onRestFinished() {
-        Log.d(TAG, "onRestFinished")
-        spotify?.toggle()
-    }
-
-    fun onWorkFinished() {
-        Log.d(TAG, "onWorkFinished")
-        spotify?.toggle()
-    }
-
-    fun onWorkoutFinished() {
-        Log.d(TAG, "onWorkoutFinished")
+    private fun onFinished() {
+        Log.d(TAG, "onFinished")
         spotify?.stop()
         setNewInterval()
         fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)

@@ -28,12 +28,11 @@ class SpotifyFacade() : ConnectionStateCallback, PlayerNotificationCallback {
         this.player = player
     }
 
-    fun toggle() {
-        Log.d(TAG, "toggle")
+    fun play() {
+        Log.d(TAG, "play")
         player?.getPlayerState { state ->
             when {
                 state.trackUri == null -> player?.play(PLAYLIST_URI)
-                state.playing -> player?.pause()
                 !state.playing -> player?.resume()
             }
         }

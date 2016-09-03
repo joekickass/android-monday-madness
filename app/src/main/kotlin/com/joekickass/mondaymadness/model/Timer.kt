@@ -19,27 +19,19 @@ import kotlin.properties.Delegates.observable
  */
 class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockWrapper()) {
 
-    class TimerRunningEvent {
-        companion object : Event<TimerRunningEvent>()
-        fun signal() = Companion.signal(this)
-    }
-
-    class TimerPausedEvent {
-        companion object : Event<TimerPausedEvent>()
-        fun signal() = Companion.signal(this)
-    }
-
-    class TimerFinishedEvent {
-        companion object : Event<TimerFinishedEvent>()
-        fun signal() = Companion.signal(this)
-    }
+    var onRunning: () -> Unit = {}
+    var onPaused: () -> Unit = {}
+    var onFinished: () -> Unit = {}
 
     private var startTimeInMillis: Long = 0
     private var timeLeftInMillis: Long = 0
     private var state: State by observable(INITIALIZED) { prop, old, new ->
-        if (new == RUNNING) TimerRunningEvent().signal()
-        if (new == PAUSED) TimerPausedEvent().signal()
-        if (new == FINISHED) TimerFinishedEvent().signal()
+        when (new) {
+            RUNNING -> onRunning()
+            PAUSED -> onPaused()
+            FINISHED -> onFinished()
+            else -> {} // do nothing
+        }
     }
 
     init {
@@ -49,11 +41,13 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
     }
 
     fun start(): Timer {
-        if (isRunning) return this
-        if (isFinished) throw IllegalStateException("Timer already finished")
+        when {
+            running -> return this
+            finished -> throw IllegalStateException("Timer already finished")
+        }
 
         startTimeInMillis = clock.elapsedRealtime()
-        if (isPaused) startTimeInMillis -= timeInMillis - timeLeftInMillis
+        if (paused) startTimeInMillis -= timeInMillis - timeLeftInMillis
 
         state = RUNNING
 
@@ -61,9 +55,10 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
     }
 
     fun pause(): Timer {
-        if (isInitialized) return this
-        if (isPaused) return this
-        if (isFinished) throw IllegalStateException("Timer already finished")
+        when {
+            initialized || paused -> return this
+            finished -> throw IllegalStateException("Timer already finished")
+        }
 
         startTimeInMillis = 0
 
@@ -83,7 +78,7 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
 
     fun tick(): Timer {
         // Calculate new progress only if we're running, else keep the old value...
-        if (isRunning) {
+        if (running) {
             timeLeftInMillis = timeInMillis - (clock.elapsedRealtime() - startTimeInMillis)
         }
 
@@ -95,16 +90,16 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
         return this
     }
 
-    val isRunning: Boolean
+    val running: Boolean
         get() = state == RUNNING
 
-    val isPaused: Boolean
+    val paused: Boolean
         get() = state == PAUSED
 
-    val isInitialized: Boolean
+    val initialized: Boolean
         get() = state == INITIALIZED
 
-    val isFinished: Boolean
+    val finished: Boolean
         get() = state == FINISHED
 
     val text: String

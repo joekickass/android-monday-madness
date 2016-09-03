@@ -26,39 +26,30 @@ class TimerTest {
     @Test
     fun newTimerWithZeroIntervalStartsInFinishedState() {
         val timer = Timer(0)
-        Assert.assertTrue(timer.isFinished)
-    }
-
-    @Test
-    fun newTimerWithZeroIntervalNotifiesCallback() {
-        var called = false
-        Timer.TimerFinishedEvent on { called = true}
-        Assert.assertFalse(called)
-
-        Timer(0)
-        Assert.assertTrue(called)
+        Assert.assertTrue(timer.finished)
     }
 
     @Test
     fun newTimerStartsInInitState() {
         val timer = Timer(10)
-        Assert.assertTrue(timer.isInitialized)
+        Assert.assertTrue(timer.initialized)
     }
 
     @Test
     fun startingATimerPutsItInRunningState() {
         val timer = Timer(10, ClockMock())
         timer.start()
-        Assert.assertTrue(timer.isRunning)
+        Assert.assertTrue(timer.running)
     }
 
     @Test
     fun startingATimerSignalsRunningEvent() {
         var called = false
-        Timer.TimerRunningEvent on { called = true}
+        val t = Timer(10, ClockMock())
+        t.onRunning = { called = true}
         Assert.assertFalse(called)
 
-        Timer(10, ClockMock()).start()
+        t.start()
         Assert.assertTrue(called)
     }
 
@@ -67,7 +58,7 @@ class TimerTest {
         val timer = Timer(10, ClockMock())
         timer.start()
         timer.start()
-        Assert.assertTrue(timer.isRunning)
+        Assert.assertTrue(timer.running)
     }
 
     @Test
@@ -81,7 +72,7 @@ class TimerTest {
     fun pausingATimerBeforeStartingItDoesNothing() {
         val timer = Timer(10, ClockMock())
         timer.pause()
-        Assert.assertTrue(timer.isInitialized)
+        Assert.assertTrue(timer.initialized)
     }
 
     @Test
@@ -89,16 +80,17 @@ class TimerTest {
         val timer = Timer(10, ClockMock())
         timer.start()
         timer.pause()
-        Assert.assertTrue(timer.isPaused)
+        Assert.assertTrue(timer.paused)
     }
 
     @Test
     fun pausingATimerSignalsPausedEvent() {
         var called = false
-        Timer.TimerPausedEvent on { called = true}
+        val t = Timer(10, ClockMock())
+        t.onRunning = { called = true}
         Assert.assertFalse(called)
 
-        Timer(10, ClockMock()).start().pause()
+        t.start().pause()
         Assert.assertTrue(called)
     }
 
@@ -108,17 +100,17 @@ class TimerTest {
         timer.start()
         timer.pause()
         timer.start()
-        Assert.assertTrue(timer.isRunning)
+        Assert.assertTrue(timer.running)
     }
 
     @Test
     fun resumingAPausedTimerSignalsRunningEvent() {
         var called = false
-        Timer.TimerRunningEvent on { called = true }
-        val timer = Timer(10, ClockMock(listOf(0, 5))).start().pause()
-        called = false
+        val t = Timer(10, ClockMock(listOf(0, 5))).start().pause()
+        t.onRunning = { called = true}
+        Assert.assertFalse(called)
 
-        timer.start()
+        t.start()
         Assert.assertTrue(called)
     }
 
@@ -177,17 +169,17 @@ class TimerTest {
              .tick().tick().tick().tick().tick()
 
         Assert.assertEquals(0.0, timer.fraction, 0.0001)
-        Assert.assertTrue(timer.isFinished)
+        Assert.assertTrue(timer.finished)
     }
 
     @Test
     fun timerTickCountsDownUntilFinished2() {
         var called = false
-        Timer.TimerFinishedEvent on { called = true}
+        val t = Timer(10, ClockMock(listOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)))
+        t.onFinished = { called = true}
         Assert.assertFalse(called)
 
-        val timer = Timer(10, ClockMock(listOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)))
-        timer.start()
+        t.start()
                 .tick().tick().tick().tick().tick()
                 .tick().tick().tick().tick().tick()
 

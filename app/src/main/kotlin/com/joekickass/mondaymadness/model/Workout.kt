@@ -1,48 +1,19 @@
 package com.joekickass.mondaymadness.model
 
-class Workout (val queue: IntervalQueue) {
+class Workout(val queue: IntervalQueue, var timer: Timer = Timer(queue.time)) {
 
-    class WorkRunningEvent {
-        companion object : Event<WorkRunningEvent>()
-        fun signal() = Companion.signal(this)
-    }
-
-    class WorkPausedEvent {
-        companion object : Event<WorkPausedEvent>()
-        fun signal() = Companion.signal(this)
-    }
-
-    class WorkFinishedEvent {
-        companion object : Event<WorkFinishedEvent>()
-        fun signal() = Companion.signal(this)
-    }
-
-    class RestRunningEvent {
-        companion object : Event<RestRunningEvent>()
-        fun signal() = Companion.signal(this)
-    }
-
-    class RestPausedEvent {
-        companion object : Event<RestPausedEvent>()
-        fun signal() = Companion.signal(this)
-    }
-
-    class RestFinishedEvent {
-        companion object : Event<RestFinishedEvent>()
-        fun signal() = Companion.signal(this)
-    }
-
-    class WorkoutFinishedEvent {
-        companion object : Event<WorkoutFinishedEvent>()
-        fun signal() = Companion.signal(this)
-    }
-
-    private var timer = Timer(queue.time)
+    var onWorkRunning: () -> Unit = {}
+    var onWorkPaused: () -> Unit = {}
+    var onWorkFinished: () -> Unit = {}
+    var onRestRunning: () -> Unit = {}
+    var onRestPaused: () -> Unit = {}
+    var onRestFinished: () -> Unit = {}
+    var onWorkoutFinished: () -> Unit = {}
 
     init {
-        Timer.TimerRunningEvent on { intervalRunning() }
-        Timer.TimerPausedEvent on { intervalPaused() }
-        Timer.TimerFinishedEvent on { intervalFinished() }
+        timer.onRunning = { intervalRunning() }
+        timer.onPaused = { intervalPaused() }
+        timer.onFinished = { intervalFinished() }
     }
 
     fun start() {
@@ -53,23 +24,25 @@ class Workout (val queue: IntervalQueue) {
         timer.pause()
     }
 
-    fun stop() {
-        timer = Timer(queue.time)
-    }
-
     private fun intervalRunning() {
-        if (queue.work) WorkRunningEvent().signal()
-        if (queue.rest) RestRunningEvent().signal()
+        when {
+            queue.work -> onWorkRunning()
+            queue.rest -> onRestRunning()
+        }
     }
 
     private fun intervalPaused() {
-        if (queue.work) WorkPausedEvent().signal()
-        if (queue.rest) RestPausedEvent().signal()
+        when {
+            queue.work -> onWorkPaused()
+            queue.rest -> onRestPaused()
+        }
     }
 
     private fun intervalFinished() {
-        if (queue.work) WorkFinishedEvent().signal()
-        if (queue.rest) RestFinishedEvent().signal()
+        when {
+            queue.work -> onWorkFinished()
+            queue.rest -> onRestFinished()
+        }
 
         // Start new if there are any intervals left
         if (queue.hasNextInterval()) {
@@ -77,7 +50,10 @@ class Workout (val queue: IntervalQueue) {
             timer = Timer(queue.time)
             start()
         } else {
-            WorkoutFinishedEvent().signal()
+            onWorkoutFinished()
         }
     }
+
+    val running: Boolean
+        get() = timer.running
 }
