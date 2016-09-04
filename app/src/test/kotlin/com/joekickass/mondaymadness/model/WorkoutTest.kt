@@ -13,7 +13,7 @@ class WorkoutTest {
 
     @Test
     fun createNewWorkoutSession() {
-        Assert.assertNotNull(Workout(IntervalQueue(10, 10, 1)))
+        Assert.assertNotNull(Workout(IntervalQueue(10, 10, 1), Timer(10, ClockMock())))
     }
 
     @Test

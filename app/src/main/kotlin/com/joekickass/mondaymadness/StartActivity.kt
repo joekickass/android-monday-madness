@@ -26,7 +26,7 @@ class StartActivity : AppCompatActivity() {
 
         // Check if already logged in
         spotify = application.getSystemService("SpotifyService") as SpotifyFacade?
-        if (spotify?.isEnabled == true) {
+        if (spotify?.enabled == true) {
             Log.d(TAG, "Already logged in, launching main activity")
             startApp()
             return

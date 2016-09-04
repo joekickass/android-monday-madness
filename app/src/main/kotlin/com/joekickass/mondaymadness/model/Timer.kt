@@ -25,6 +25,7 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
 
     private var startTimeInMillis: Long = 0
     private var timeLeftInMillis: Long = 0
+
     private var state: State by observable(INITIALIZED) { prop, old, new ->
         when (new) {
             RUNNING -> onRunning()
@@ -35,9 +36,7 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
     }
 
     init {
-        if (timeInMillis < 0L) throw IllegalArgumentException("Argument must not be less than zero")
-        if (timeInMillis == 0L) finish()
-        timeLeftInMillis = timeInMillis
+        reset()
     }
 
     fun start(): Timer {
@@ -63,6 +62,18 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
         startTimeInMillis = 0
 
         state = PAUSED
+
+        return this
+    }
+
+    fun reset(): Timer {
+
+        state = INITIALIZED
+
+        if (timeInMillis < 0L) throw IllegalArgumentException("Argument must not be less than zero")
+        if (timeInMillis == 0L) finish()
+
+        timeLeftInMillis = timeInMillis
 
         return this
     }

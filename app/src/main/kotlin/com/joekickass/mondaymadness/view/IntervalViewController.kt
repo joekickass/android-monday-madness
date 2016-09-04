@@ -1,18 +1,24 @@
 package com.joekickass.mondaymadness.view
 
+import com.joekickass.mondaymadness.model.IntervalQueue
+import com.joekickass.mondaymadness.model.Timer
 import com.joekickass.mondaymadness.model.Workout
 
 /**
  * Controller for [IntervalView]
  */
-class IntervalViewController(private val view: IntervalView, private val workout: Workout) {
+class IntervalViewController(private val view: IntervalView, queue: IntervalQueue) {
+
+    private val workout : Workout
 
     var onRunning: () -> Unit = {}
     var onPaused: () -> Unit = {}
     var onFinished: () -> Unit = {}
 
     init {
-        view.init(workout.timer)
+        val timer = Timer(queue.time)
+        view.init(timer)
+        workout = Workout(queue, timer)
         workout.onWorkRunning = { onRunning() }
         workout.onWorkPaused = { onPaused() }
         workout.onWorkoutFinished = { onFinished() }

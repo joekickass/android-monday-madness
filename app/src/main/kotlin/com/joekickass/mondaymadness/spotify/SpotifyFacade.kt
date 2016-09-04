@@ -14,7 +14,7 @@ class SpotifyFacade() : ConnectionStateCallback, Player.NotificationCallback {
 
     private var player : Player? = null
 
-    val isEnabled : Boolean
+    val enabled: Boolean
         get() = player != null
 
     fun setPlayer(player: SpotifyPlayer) {
@@ -27,9 +27,8 @@ class SpotifyFacade() : ConnectionStateCallback, Player.NotificationCallback {
     fun play() {
         Log.d(TAG, "play")
         when {
-            player?.playbackState?.isPlaying as Boolean -> {} // do nothing
+            player?.metadata?.currentTrack == null -> player?.playUri(PLAYLIST_URI, 0, 0)
             player?.playbackState?.isPlaying != true -> player?.resume()
-            player?.metadata == null -> player?.playUri(PLAYLIST_URI, 0, 0)
         }
     }
 

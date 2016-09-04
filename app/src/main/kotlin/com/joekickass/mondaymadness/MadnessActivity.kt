@@ -34,24 +34,20 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
     private var spotify : SpotifyFacade? = null
 
-    private var mViewController: IntervalViewController? = null
+    private var viewController: IntervalViewController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         fab.setOnClickListener {
-            mViewController?.onClick()
+            viewController?.onClick()
         }
 
         val realm = Realm.getDefaultInstance()
         realm.addChangeListener(this)
 
         spotify = application.getSystemService("SpotifyService") as SpotifyFacade
-
-        mViewController?.onRunning = { onRunning() }
-        mViewController?.onPaused =  { onPaused() }
-        mViewController?.onFinished = { onFinished() }
 
         setNewInterval()
     }
@@ -63,7 +59,11 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
                    " reps=" + interval.repetitions)
 
         val q = IntervalQueue(interval.workInMillis, interval.restInMillis, interval.repetitions)
-        mViewController = IntervalViewController(pwv, Workout(q))
+
+        viewController = IntervalViewController(pwv, q)
+        viewController?.onRunning = { onRunning() }
+        viewController?.onPaused =  { onPaused() }
+        viewController?.onFinished = { onFinished() }
     }
 
     override fun onDestroy() {
