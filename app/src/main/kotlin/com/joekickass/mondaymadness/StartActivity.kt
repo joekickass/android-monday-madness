@@ -12,7 +12,7 @@ import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
 import com.spotify.sdk.android.player.Config
-import com.spotify.sdk.android.player.Player
+import com.spotify.sdk.android.player.SpotifyPlayer
 import com.spotify.sdk.android.player.Spotify
 
 import kotlinx.android.synthetic.main.activity_start.*
@@ -66,9 +66,9 @@ class StartActivity : AppCompatActivity() {
         Log.d(TAG, "Authenticated with Spotify, initializing player...")
 
         val playerConfig = Config(applicationContext, token, CLIENT_ID)
-        Spotify.getPlayer(playerConfig, application, object : Player.InitializationObserver {
+        Spotify.getPlayer(playerConfig, application, object : SpotifyPlayer.InitializationObserver {
 
-            override fun onInitialized(player: Player) {
+            override fun onInitialized(player: SpotifyPlayer) {
                 Log.d(TAG, "Spotify player initialized")
                 val facade = application.getSystemService("SpotifyService") as SpotifyFacade
                 facade.setPlayer(player)

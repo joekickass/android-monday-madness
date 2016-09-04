@@ -1,18 +1,14 @@
 package com.joekickass.mondaymadness.spotify
 
 import android.util.Log
-
-import com.spotify.sdk.android.player.ConnectionStateCallback
-import com.spotify.sdk.android.player.Player
-import com.spotify.sdk.android.player.PlayerNotificationCallback
-import com.spotify.sdk.android.player.PlayerState
+import com.spotify.sdk.android.player.*
 
 /**
  * Spotify API facade.
  *
- * Simplifies interaction with [com.spotify.sdk.android.player.Player]
+ * Simplifies interaction with [com.spotify.sdk.android.player.SpotifyPlayer]
  */
-class SpotifyFacade() : ConnectionStateCallback, PlayerNotificationCallback {
+class SpotifyFacade() : ConnectionStateCallback, Player.NotificationCallback {
 
     private val TAG = SpotifyFacade::class.java.simpleName
 
@@ -21,20 +17,19 @@ class SpotifyFacade() : ConnectionStateCallback, PlayerNotificationCallback {
     val isEnabled : Boolean
         get() = player != null
 
-    fun setPlayer(player: Player) {
+    fun setPlayer(player: SpotifyPlayer) {
         Log.d(TAG, "init")
         player.addConnectionStateCallback(this)
-        player.addPlayerNotificationCallback(this)
+        player.addNotificationCallback(this)
         this.player = player
     }
 
     fun play() {
         Log.d(TAG, "play")
-        player?.getPlayerState { state ->
-            when {
-                state.trackUri == null -> player?.play(PLAYLIST_URI)
-                !state.playing -> player?.resume()
-            }
+        when {
+            player?.playbackState?.isPlaying as Boolean -> {} // do nothing
+            player?.playbackState?.isPlaying != true -> player?.resume()
+            player?.metadata == null -> player?.playUri(PLAYLIST_URI, 0, 0)
         }
     }
 
@@ -43,12 +38,8 @@ class SpotifyFacade() : ConnectionStateCallback, PlayerNotificationCallback {
         player?.pause()
     }
 
-    override fun onPlaybackEvent(eventType: PlayerNotificationCallback.EventType, playerState: PlayerState) {
+    override fun onPlaybackEvent(event: PlayerEvent?) {
         Log.d(TAG, "onPlaybackEvent")
-    }
-
-    override fun onPlaybackError(errorType: PlayerNotificationCallback.ErrorType, s: String) {
-        Log.d(TAG, "onPlaybackError")
     }
 
     override fun onLoggedIn() {
@@ -59,8 +50,12 @@ class SpotifyFacade() : ConnectionStateCallback, PlayerNotificationCallback {
         Log.d(TAG, "onLoggedOut")
     }
 
-    override fun onLoginFailed(throwable: Throwable) {
+    override fun onLoginFailed(error: Int) {
         Log.d(TAG, "onLoginFailed")
+    }
+
+    override fun onPlaybackError(error: Error?) {
+        Log.d(TAG, "onPlaybackError")
     }
 
     override fun onTemporaryError() {
