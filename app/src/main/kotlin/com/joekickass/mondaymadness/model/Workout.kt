@@ -1,6 +1,6 @@
 package com.joekickass.mondaymadness.model
 
-class Workout(val queue: IntervalQueue, val timer: Timer) {
+class Workout(val queue: IntervalQueue, val timer: Timer = Timer(queue.time)) {
 
     var onWorkRunning: () -> Unit = {}
     var onWorkPaused: () -> Unit = {}
@@ -16,12 +16,14 @@ class Workout(val queue: IntervalQueue, val timer: Timer) {
         timer.onFinished = { intervalFinished() }
     }
 
-    fun start() {
+    fun start(): Workout {
         timer.start()
+        return this
     }
 
-    fun pause() {
+    fun pause(): Workout {
         timer.pause()
+        return this
     }
 
     private fun intervalRunning() {
@@ -47,7 +49,7 @@ class Workout(val queue: IntervalQueue, val timer: Timer) {
         // Start new if there are any intervals left
         if (queue.hasNextInterval()) {
             queue.nextInterval()
-            timer.reset()
+            timer.reset(queue.time)
             start()
         } else {
             onWorkoutFinished()

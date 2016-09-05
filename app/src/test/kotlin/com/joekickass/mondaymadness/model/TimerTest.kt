@@ -187,21 +187,21 @@ class TimerTest {
     }
 
     @Test
-    fun resettingANewTimerDoesNothing() {
+    fun resettingANewTimerUpdatesTime() {
         val timer = Timer(10, ClockMock())
         Assert.assertTrue(timer.initialized)
 
-        timer.reset()
+        timer.reset(10)
         Assert.assertTrue(timer.initialized)
     }
 
     @Test
-    fun resettingANewTimerDoesNothing2() {
+    fun resettingANewTimerUpdatesTime2() {
         val timer = Timer(2000, ClockMock())
         Assert.assertEquals("2.0", timer.text)
 
-        timer.reset()
-        Assert.assertEquals("2.0", timer.text)
+        timer.reset(1000)
+        Assert.assertEquals("1.0", timer.text)
     }
 
     @Test
@@ -209,7 +209,7 @@ class TimerTest {
         val timer = Timer(0, ClockMock())
         Assert.assertTrue(timer.finished)
 
-        timer.reset()
+        timer.reset(0)
         Assert.assertTrue(timer.finished)
     }
 
@@ -219,7 +219,7 @@ class TimerTest {
         timer.start().tick().tick()
         Assert.assertTrue(timer.finished)
 
-        timer.reset()
+        timer.reset(10)
         Assert.assertTrue(timer.initialized)
     }
 
@@ -229,7 +229,7 @@ class TimerTest {
         timer.start()
         Assert.assertTrue(timer.running)
 
-        timer.reset()
+        timer.reset(10)
         Assert.assertTrue(timer.initialized)
     }
 
@@ -239,7 +239,7 @@ class TimerTest {
         timer.start().pause()
         Assert.assertTrue(timer.paused)
 
-        timer.reset()
+        timer.reset(10)
         Assert.assertTrue(timer.initialized)
     }
 

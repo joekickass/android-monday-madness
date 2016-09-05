@@ -10,9 +10,8 @@ import android.view.MenuItem
 import com.joekickass.mondaymadness.menu.about.AboutActivity
 import com.joekickass.mondaymadness.menu.interval.AddIntervalDialogFragment
 import com.joekickass.mondaymadness.model.IntervalQueue
-import com.joekickass.mondaymadness.model.Workout
-import com.joekickass.mondaymadness.view.IntervalViewController
-import com.joekickass.mondaymadness.view.IntervalView
+import com.joekickass.mondaymadness.view.WorkoutViewController
+import com.joekickass.mondaymadness.view.WorkoutView
 import com.joekickass.mondaymadness.realm.Interval
 import com.joekickass.mondaymadness.spotify.SpotifyFacade
 
@@ -25,7 +24,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 /**
  * Main entry point for app
  *
- * Inflates the [IntervalView] and connects it to its [IntervalViewController]
+ * Inflates the [WorkoutView] and connects it to its [WorkoutViewController]
  * controller. Also delegates adding a new interval to the [AddIntervalDialogFragment]. New
  * intervals will be added to Realm, and [MadnessActivity] will be notified through
  * [RealmChangeListener].
@@ -34,7 +33,7 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
     private var spotify : SpotifyFacade? = null
 
-    private var viewController: IntervalViewController? = null
+    private var viewController: WorkoutViewController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,9 +59,10 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
         val q = IntervalQueue(interval.workInMillis, interval.restInMillis, interval.repetitions)
 
-        viewController = IntervalViewController(pwv, q)
+        viewController = WorkoutViewController(pwv, q)
         viewController?.onRunning = { onRunning() }
         viewController?.onPaused =  { onPaused() }
+        viewController?.onRest =  { onRest() }
         viewController?.onFinished = { onFinished() }
     }
 
@@ -118,6 +118,12 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         Log.d(TAG, "onPaused")
         spotify?.stop()
         fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
+    }
+
+    private fun onRest() {
+        Log.d(TAG, "onRest")
+        spotify?.stop()
+        fab.setImageResource(R.drawable.ic_pause_white_48dp)
     }
 
     private fun onFinished() {

@@ -6,13 +6,13 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
-import com.joekickass.mondaymadness.R.styleable.IntervalView
+import com.joekickass.mondaymadness.R.styleable.WorkoutView
 import com.joekickass.mondaymadness.R.styleable.*
 
-import com.joekickass.mondaymadness.model.Timer
+import com.joekickass.mondaymadness.model.Workout
 
 /**
- * A graphical visualization of a interval timer (countdown timer)
+ * A graphical visualization of a workout interval timer (countdown timer)
  *
  * To set a new interval, call [.init] with the desired interval time in ms.
  * To start the new interval, call [.start]. The view will handle countdown internally.
@@ -20,9 +20,9 @@ import com.joekickass.mondaymadness.model.Timer
  * Thanks to Antimonit for the idea behind this class.
  * http://stackoverflow.com/a/27293082
  */
-class IntervalView(context: Context, attrs: AttributeSet) : View(context, attrs) {
+class WorkoutView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-    private var mTimer = Timer(0)
+    private var mWorkout: Workout? = null
 
     // Internal
     private val mBackgroundPaint = Paint()
@@ -34,19 +34,19 @@ class IntervalView(context: Context, attrs: AttributeSet) : View(context, attrs)
 
     init {
         // Read attributes
-        val a = context.theme.obtainStyledAttributes(attrs, IntervalView, 0, 0)
+        val a = context.theme.obtainStyledAttributes(attrs, WorkoutView, 0, 0)
         try {
 
             // the style of the background
-            val bgColor = a.getColor(IntervalView_color_background, 0)
+            val bgColor = a.getColor(WorkoutView_color_background, 0)
             setPaintProperties(mBackgroundPaint, bgColor)
 
             // the style of the 'progress'
-            val progressColor = a.getColor(IntervalView_color_progress, 0)
+            val progressColor = a.getColor(WorkoutView_color_progress, 0)
             setPaintProperties(mProgressPaint, progressColor)
 
             // the style for the text in the middle
-            val textColor = a.getColor(IntervalView_color_text, 0)
+            val textColor = a.getColor(WorkoutView_color_text, 0)
             mTextOffset = setTextProperties(mTextPaint, textColor, RADIUS)
 
         } finally {
@@ -54,23 +54,32 @@ class IntervalView(context: Context, attrs: AttributeSet) : View(context, attrs)
         }
     }
 
-    fun init(timer: Timer) {
-        mTimer = timer
+    fun init(workout: Workout) {
+        mWorkout = workout
         postInvalidateOnAnimation()
     }
 
     fun start() {
-        mTimer.start()
+        mWorkout?.start()
         postInvalidateOnAnimation()
     }
 
     fun pause() {
-        mTimer.pause()
+        mWorkout?.pause()
         postInvalidateOnAnimation()
+    }
+
+    fun click() {
+        when {
+            mWorkout?.running == true -> pause()
+            else -> start()
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+
+        val timer = mWorkout!!.timer
 
         val centerWidth = (canvas.width / 2).toFloat()
         val centerHeight = (canvas.height / 2).toFloat()
@@ -82,20 +91,20 @@ class IntervalView(context: Context, attrs: AttributeSet) : View(context, attrs)
                 centerHeight + RADIUS)
 
         // Not yet started, show empty ring and total time (can be '0.0' if finished)
-        if (mTimer.finished || mTimer.initialized) {
+        if (timer.finished || timer.initialized) {
 
             canvas.drawCircle(centerWidth, centerHeight, RADIUS, mBackgroundPaint)
             canvas.drawText(
-                    mTimer.text,
+                    timer.text,
                     centerWidth,
                     centerHeight + mTextOffset,
                     mTextPaint)
             return
         }
 
-        mTimer.tick()
+        timer.tick()
 
-        if (mTimer.finished) {
+        if (timer.finished) {
             postInvalidateOnAnimation()
             return
         }
@@ -107,7 +116,7 @@ class IntervalView(context: Context, attrs: AttributeSet) : View(context, attrs)
 
         // Display text inside the circle
         canvas.drawText(
-                mTimer.text,
+                timer.text,
                 centerWidth,
                 centerHeight + mTextOffset,
                 mTextPaint)
@@ -117,14 +126,14 @@ class IntervalView(context: Context, attrs: AttributeSet) : View(context, attrs)
         canvas.drawArc(
                 mCircleBounds, // Size of progress circle
                 -90f, // -90 is at top
-                (mTimer.fraction * 360).toFloat(), // [ 0 <= progress <= 1]
+                (timer.fraction * 360).toFloat(), // [ 0 <= progress <= 1]
                 false,
                 mBackgroundPaint)
 
         // Draw nob on the circle
         canvas.drawCircle(
-                (centerWidth + Math.sin(mTimer.fraction * 2.0 * Math.PI) * RADIUS).toFloat(),
-                (centerHeight - Math.cos(mTimer.fraction * 2.0 * Math.PI) * RADIUS).toFloat(),
+                (centerWidth + Math.sin(timer.fraction * 2.0 * Math.PI) * RADIUS).toFloat(),
+                (centerHeight - Math.cos(timer.fraction * 2.0 * Math.PI) * RADIUS).toFloat(),
                 HANDLE_RADIUS.toFloat(),
                 mProgressPaint)
 

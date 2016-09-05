@@ -17,7 +17,7 @@ import kotlin.properties.Delegates.observable
  * series of intervals would probably be lagging a bit since the new timer won't start until the
  * view is finished with the last timer. I might need to rework this a bit later =)
  */
-class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockWrapper()) {
+class Timer(var timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockWrapper()) {
 
     var onRunning: () -> Unit = {}
     var onPaused: () -> Unit = {}
@@ -36,7 +36,7 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
     }
 
     init {
-        reset()
+        reset(timeInMillis)
     }
 
     fun start(): Timer {
@@ -66,7 +66,9 @@ class Timer(val timeInMillis: Long, val clock: ISystemClock = Timer.SystemClockW
         return this
     }
 
-    fun reset(): Timer {
+    fun reset(newTimeInMillis: Long): Timer {
+
+        timeInMillis = newTimeInMillis
 
         state = INITIALIZED
 

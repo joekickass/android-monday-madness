@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".MadnessActivity">
 
-    <com.joekickass.mondaymadness.view.IntervalView
+    <com.joekickass.mondaymadness.view.WorkoutView
         android:id="@+id/pwv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
