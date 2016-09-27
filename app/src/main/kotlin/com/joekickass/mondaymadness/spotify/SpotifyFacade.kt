@@ -24,6 +24,11 @@ class SpotifyFacade() : ConnectionStateCallback, Player.NotificationCallback {
         this.player = player
     }
 
+    fun unsetPlayer() {
+        Log.d(TAG, "clear")
+        player = null
+    }
+
     fun play() {
         Log.d(TAG, "play")
         when {

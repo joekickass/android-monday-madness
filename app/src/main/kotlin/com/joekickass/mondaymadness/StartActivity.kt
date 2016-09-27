@@ -11,9 +11,6 @@ import com.joekickass.mondaymadness.spotify.SpotifyFacade
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
-import com.spotify.sdk.android.player.Config
-import com.spotify.sdk.android.player.SpotifyPlayer
-import com.spotify.sdk.android.player.Spotify
 
 import kotlinx.android.synthetic.main.activity_start.*
 
@@ -39,6 +36,7 @@ class StartActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_start)
 
+        // TODO: Get rid of button, add nice splash screen / animation
         gobtn.setOnClickListener {
             startSpotifyAuth()
         }
@@ -48,17 +46,19 @@ class StartActivity : AppCompatActivity() {
         val request = AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI)
                 .setScopes(arrayOf("streaming"))
                 .build()
-        Log.d(TAG, "Starting LoginActivity")
+        Log.d(TAG, "Starting Spotify LoginActivity")
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
 
-        Log.d(TAG, "LoginActivity finished, handling result...")
         if (requestCode == REQUEST_CODE) {
 
             val response = AuthenticationClient.getResponse(resultCode, intent)
+
+            Log.d(TAG, "Spotify LoginActivity finished with result=" + response.type)
+
             when (response.type) {
                 AuthenticationResponse.Type.TOKEN -> handleLoginSuccess(response.accessToken)
                 AuthenticationResponse.Type.ERROR -> handleLoginError(response.error)
@@ -69,23 +69,8 @@ class StartActivity : AppCompatActivity() {
 
     private fun handleLoginSuccess(token: String) {
         Log.d(TAG, "Authenticated with Spotify, initializing player...")
-
-        // TODO: Move to Application
-        val playerConfig = Config(applicationContext, token, CLIENT_ID)
-        Spotify.getPlayer(playerConfig, application, object : SpotifyPlayer.InitializationObserver {
-
-            override fun onInitialized(player: SpotifyPlayer) {
-                Log.d(TAG, "Spotify player initialized")
-                val facade = application.getSystemService("SpotifyService") as SpotifyFacade
-                facade.setPlayer(player)
-                startApp()
-            }
-
-            override fun onError(throwable: Throwable) {
-                Log.e(TAG, "Could not initialize Spotify player: " + throwable.message)
-                TODO()
-            }
-        })
+        (application as MadnessApplication).enableSpotify(token)
+        startApp()
     }
 
     private fun handleLoginError(error: String) {
@@ -101,8 +86,7 @@ class StartActivity : AppCompatActivity() {
     }
 
     private fun startApp() {
-        val intent = Intent(baseContext, MadnessActivity::class.java)
-        startActivity(intent)
+        startActivity(Intent(baseContext, MadnessActivity::class.java))
         finish()
     }
 
