@@ -12,9 +12,9 @@ apply plugin: 'net.researchgate.release'
 apply plugin: 'realm-android'
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:appcompat-v7:24.2.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:design:24.2.1'
     compile 'com.spotify.sdk:spotify-auth:beta21-noconnect-2.18c@aar'
     compile 'com.spotify.sdk:spotify-player:beta21-noconnect-2.18c@aar'
     testCompile 'junit:junit:4.12'
@@ -27,7 +27,7 @@ props.load(new FileInputStream(rootProject.file("release.properties")))
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '24.0.0'
+    buildToolsVersion '24.0.2'
 
     defaultConfig {
         applicationId "com.joekickass.mondaymadness"
