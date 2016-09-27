@@ -19,9 +19,14 @@ class SpotifyFacade() : ConnectionStateCallback, Player.NotificationCallback {
 
     fun setPlayer(player: SpotifyPlayer) {
         Log.d(TAG, "init")
+        // TODO: Set connectivity status
         player.addConnectionStateCallback(this)
         player.addNotificationCallback(this)
         this.player = player
+    }
+
+    fun updatePlayer(token: String) {
+        player?.login(token)
     }
 
     fun unsetPlayer() {
@@ -44,6 +49,7 @@ class SpotifyFacade() : ConnectionStateCallback, Player.NotificationCallback {
 
     override fun onPlaybackEvent(event: PlayerEvent?) {
         Log.d(TAG, "onPlaybackEvent")
+        // TODO: Keep track of metadata and playback state
     }
 
     override fun onLoggedIn() {

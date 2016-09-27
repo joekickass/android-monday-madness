@@ -27,19 +27,24 @@ class MadnessApplication : Application() {
     }
 
     override fun getSystemService(name: String?): Any? {
-        if ("SpotifyService".equals(name)) return spotify
+        if ("SpotifyService" == name) return spotify
         return super.getSystemService(name)
     }
 
     fun enableSpotify(token: String) {
+        when (spotify.enabled) {
+            true -> spotify.updatePlayer(token)
+            false -> getNewPlayer(token)
+        }
+    }
+
+    private fun getNewPlayer(token: String) {
         val playerConfig = Config(applicationContext, token, CLIENT_ID)
         Spotify.getPlayer(playerConfig, this, object : SpotifyPlayer.InitializationObserver {
-
             override fun onInitialized(player: SpotifyPlayer) {
                 Log.d(TAG, "Spotify player initialized")
                 spotify.setPlayer(player)
             }
-
             override fun onError(throwable: Throwable) {
                 Log.e(TAG, "Could not initialize Spotify player: " + throwable.message)
                 TODO()
