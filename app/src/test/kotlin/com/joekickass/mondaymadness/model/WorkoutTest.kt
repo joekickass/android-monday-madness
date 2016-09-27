@@ -96,6 +96,82 @@ class WorkoutTest {
         Assert.assertTrue(called)
     }
 
+    @Test
+    fun startingNewWorkFiresEvent() {
+        var called = false
+        val timer = Timer(10, ClockMock(listOf(0, 10, 20, 30, 40)))
+        val workout = Workout(IntervalQueue(10, 10, 2), timer)
+        workout.onWorkRunning = { called = true}
+        Assert.assertFalse(called)
+
+        workout.start() // 1st work running
+        timer.tick()    // 1st work finishes, 1st rest running
+        called = false  // reset flag
+        timer.tick()    // 1st rest finishes, 2nd work running
+
+        Assert.assertTrue(called)
+    }
+
+    @Test
+    fun startingNewRestFiresEvent() {
+        var called = false
+        val timer = Timer(10, ClockMock(listOf(0, 10, 20, 30, 40, 50, 60)))
+        val workout = Workout(IntervalQueue(10, 10, 2), timer)
+        workout.onRestRunning = { called = true}
+        Assert.assertFalse(called)
+
+        workout.start() // 1st work running
+        timer.tick()    // 1st work finishes, 1st rest running
+        called = false  // reset flag
+        timer.tick()    // 1st rest finishes, 2nd work running
+        timer.tick()    // 2nd work finishes, 2nd rest running
+
+        Assert.assertTrue(called)
+    }
+
+    @Test
+    fun finishingWorkoutFiresEvent() {
+        var called = false
+        val timer = Timer(10, ClockMock(listOf(0, 10, 20, 30, 40, 50, 60, 70)))
+        val workout = Workout(IntervalQueue(10, 10, 2), timer)
+        workout.onWorkoutFinished = { called = true}
+        Assert.assertFalse(called)
+
+        workout.start() // 1st work running
+        timer.tick()    // 1st work finishes, 1st rest running
+        timer.tick()    // 1st rest finishes, 2nd work running
+        timer.tick()    // 2nd work finishes, 2nd rest running
+        timer.tick()    // 2nd rest finishes, workout done
+
+        Assert.assertTrue(called)
+    }
+
+    @Test
+    fun startingWorkoutAfterFinishIsNotValid() {
+        val timer = Timer(10, ClockMock(listOf(0, 10, 20, 30)))
+        val workout = Workout(IntervalQueue(10, 10, 1), timer)
+
+        workout.start() // 1st work running
+        timer.tick()    // 1st work finishes, 1st rest running
+        timer.tick()    // 1st rest finishes, workout done
+
+        exception.expect(IllegalStateException::class.java)
+        workout.start()
+    }
+
+    @Test
+    fun pausingWorkoutAfterFinishIsNotValid() {
+        val timer = Timer(10, ClockMock(listOf(0, 10, 20, 30)))
+        val workout = Workout(IntervalQueue(10, 10, 1), timer)
+
+        workout.start() // 1st work running
+        timer.tick()    // 1st work finishes, 1st rest running
+        timer.tick()    // 1st rest finishes, workout done
+
+        exception.expect(IllegalStateException::class.java)
+        workout.pause()
+    }
+
     private class ClockMock(ticks: List<Long> = listOf(0)) : Timer.ISystemClock {
         val iter = ticks.listIterator()
         override fun elapsedRealtime(): Long {

@@ -17,6 +17,11 @@ import com.spotify.sdk.android.player.Spotify
 
 import kotlinx.android.synthetic.main.activity_start.*
 
+/**
+ * Main entry point for app
+ *
+ * Handles Spotify login and continues to [MadnessActivity] when finished
+ */
 class StartActivity : AppCompatActivity() {
 
     private var spotify : SpotifyFacade? = null
@@ -65,6 +70,7 @@ class StartActivity : AppCompatActivity() {
     private fun handleLoginSuccess(token: String) {
         Log.d(TAG, "Authenticated with Spotify, initializing player...")
 
+        // TODO: Move to Application
         val playerConfig = Config(applicationContext, token, CLIENT_ID)
         Spotify.getPlayer(playerConfig, application, object : SpotifyPlayer.InitializationObserver {
 

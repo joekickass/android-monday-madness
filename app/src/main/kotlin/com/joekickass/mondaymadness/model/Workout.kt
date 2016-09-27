@@ -1,6 +1,6 @@
 package com.joekickass.mondaymadness.model
 
-class Workout(val queue: IntervalQueue, val timer: Timer = Timer(queue.time)) {
+class Workout(private val queue: IntervalQueue, internal val timer: Timer = Timer(queue.time)) {
 
     var onWorkRunning: () -> Unit = {}
     var onWorkPaused: () -> Unit = {}

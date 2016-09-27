@@ -10,7 +10,7 @@ import android.view.MenuItem
 import com.joekickass.mondaymadness.menu.about.AboutActivity
 import com.joekickass.mondaymadness.menu.interval.AddIntervalDialogFragment
 import com.joekickass.mondaymadness.model.IntervalQueue
-import com.joekickass.mondaymadness.view.WorkoutViewController
+import com.joekickass.mondaymadness.model.Workout
 import com.joekickass.mondaymadness.view.WorkoutView
 import com.joekickass.mondaymadness.realm.Interval
 import com.joekickass.mondaymadness.spotify.SpotifyFacade
@@ -22,25 +22,20 @@ import io.realm.Sort
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**
- * Main entry point for app
- *
- * Inflates the [WorkoutView] and connects it to its [WorkoutViewController]
- * controller. Also delegates adding a new interval to the [AddIntervalDialogFragment]. New
- * intervals will be added to Realm, and [MadnessActivity] will be notified through
+ * Inflates the [WorkoutView] and delegates adding a new interval to the [AddIntervalDialogFragment].
+ * New intervals will be added to Realm, and [MadnessActivity] will be notified through
  * [RealmChangeListener].
  */
 class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
     private var spotify : SpotifyFacade? = null
 
-    private var viewController: WorkoutViewController? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         fab.setOnClickListener {
-            viewController?.onClick()
+            pwv.click()
         }
 
         val realm = Realm.getDefaultInstance()
@@ -57,13 +52,16 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
                    " r=" + interval.restInMillis +
                    " reps=" + interval.repetitions)
 
-        val q = IntervalQueue(interval.workInMillis, interval.restInMillis, interval.repetitions)
+        val w = Workout(IntervalQueue(
+                interval.workInMillis,
+                interval.restInMillis,
+                interval.repetitions))
 
-        viewController = WorkoutViewController(pwv, q)
-        viewController?.onRunning = { onRunning() }
-        viewController?.onPaused =  { onPaused() }
-        viewController?.onRest =  { onRest() }
-        viewController?.onFinished = { onFinished() }
+        w.onWorkRunning = { onRunning() }
+        w.onWorkPaused = { onPaused() }
+        w.onRestRunning = { onRest() }
+        w.onWorkoutFinished = { onFinished() }
+        pwv.init(w)
     }
 
     override fun onDestroy() {
@@ -83,7 +81,7 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         when (item.itemId) {
 
             R.id.action_reset -> {
-                spotify?.stop()
+                stopMusic()
                 setNewInterval()
                 return true
             }
@@ -99,8 +97,7 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
             }
 
             R.id.action_about -> {
-                val intent = Intent(this, AboutActivity::class.java)
-                startActivity(intent)
+                startActivity(Intent(this, AboutActivity::class.java))
                 return true
             }
 
@@ -110,27 +107,23 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
     private fun onRunning() {
         Log.d(TAG, "onRunning")
-        spotify?.play()
-        fab.setImageResource(R.drawable.ic_pause_white_48dp)
+        playMusic()
     }
 
     private fun onPaused() {
         Log.d(TAG, "onPaused")
-        spotify?.stop()
-        fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
+        stopMusic()
     }
 
     private fun onRest() {
         Log.d(TAG, "onRest")
-        spotify?.stop()
-        fab.setImageResource(R.drawable.ic_pause_white_48dp)
+        pauseMusic()
     }
 
     private fun onFinished() {
         Log.d(TAG, "onFinished")
-        spotify?.stop()
+        stopMusic()
         setNewInterval()
-        fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
     }
 
     private val lastInterval: Interval
@@ -143,6 +136,20 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
     override fun onChange(realm: Realm) {
         Log.d(TAG, "Setting up new interval")
         setNewInterval()
+    }
+
+    private fun playMusic() {
+        spotify?.play()
+        fab.setImageResource(R.drawable.ic_pause_white_48dp)
+    }
+
+    private fun stopMusic() {
+        spotify?.stop()
+        fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
+    }
+
+    private fun pauseMusic() {
+        spotify?.stop()
     }
 
     companion object {
