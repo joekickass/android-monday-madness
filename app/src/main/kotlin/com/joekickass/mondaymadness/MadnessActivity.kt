@@ -57,9 +57,10 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
                 interval.restInMillis,
                 interval.repetitions))
 
-        w.onWorkRunning = { onRunning() }
-        w.onWorkPaused = { onPaused() }
-        w.onRestRunning = { onRest() }
+        w.onWorkRunning = { onWorkRunning() }
+        w.onWorkPaused = { onWorkPaused() }
+        w.onRestRunning = { onRestRunning() }
+        w.onRestPaused = { onRestPaused() }
         w.onWorkoutFinished = { onFinished() }
         pwv.init(w)
     }
@@ -81,7 +82,7 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         when (item.itemId) {
 
             R.id.action_reset -> {
-                stopMusic()
+                setStopState() // TODO: Need to reset spotify playlist?
                 setNewInterval()
                 return true
             }
@@ -105,24 +106,29 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         }
     }
 
-    private fun onRunning() {
-        Log.d(TAG, "onRunning")
-        playMusic()
+    private fun onWorkRunning() {
+        Log.d(TAG, "onWorkRunning")
+        setWorkState()
     }
 
-    private fun onPaused() {
-        Log.d(TAG, "onPaused")
-        stopMusic()
+    private fun onWorkPaused() {
+        Log.d(TAG, "onWorkPaused")
+        setStopState()
     }
 
-    private fun onRest() {
-        Log.d(TAG, "onRest")
-        pauseMusic()
+    private fun onRestRunning() {
+        Log.d(TAG, "onRestRunning")
+        setRestState()
+    }
+
+    private fun onRestPaused() {
+        Log.d(TAG, "onRestPaused")
+        setRestPausedState()
     }
 
     private fun onFinished() {
         Log.d(TAG, "onFinished")
-        stopMusic()
+        setStopState()
         setNewInterval()
     }
 
@@ -138,18 +144,26 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
         setNewInterval()
     }
 
-    private fun playMusic() {
+    // TODO: Need to rename these
+
+    private fun setWorkState() {
         spotify?.play()
         fab.setImageResource(R.drawable.ic_pause_white_48dp)
     }
 
-    private fun stopMusic() {
+    private fun setStopState() {
         spotify?.stop()
         fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
     }
 
-    private fun pauseMusic() {
+    private fun setRestState() {
         spotify?.stop()
+        fab.setImageResource(R.drawable.ic_pause_white_48dp)
+    }
+
+    private fun setRestPausedState() {
+        spotify?.stop()
+        fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
     }
 
     companion object {
