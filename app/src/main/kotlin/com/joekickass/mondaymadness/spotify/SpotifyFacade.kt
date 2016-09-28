@@ -37,14 +37,14 @@ class SpotifyFacade() : ConnectionStateCallback, Player.NotificationCallback {
     fun play() {
         Log.d(TAG, "play")
         when {
-            player?.metadata?.currentTrack == null -> player?.playUri(PLAYLIST_URI, 0, 0)
-            player?.playbackState?.isPlaying != true -> player?.resume()
+            player?.metadata?.currentTrack == null -> player?.playUri(callback, PLAYLIST_URI, 0, 0)
+            player?.playbackState?.isPlaying != true -> player?.resume(callback)
         }
     }
 
     fun stop() {
         Log.d(TAG, "stop")
-        player?.pause()
+        player?.pause(callback)
     }
 
     override fun onPlaybackEvent(event: PlayerEvent?) {
@@ -74,6 +74,15 @@ class SpotifyFacade() : ConnectionStateCallback, Player.NotificationCallback {
 
     override fun onConnectionMessage(s: String) {
         Log.d(TAG, "onConnectionMessage")
+    }
+
+    private val callback = object : Player.OperationCallback {
+        override fun onSuccess() {
+            Log.d(TAG, "OK!")
+        }
+        override fun onError(error: Error) {
+            Log.d(TAG, "ERROR:" + error)
+        }
     }
 
     companion object {
