@@ -1,0 +1,65 @@
+package com.joekickass.mondaymadness
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.os.Build.*
+import android.os.Bundle
+import android.telephony.SmsMessage
+import android.util.Log
+import uy.klutter.core.uri.UriBuilder
+import uy.klutter.core.uri.buildUri
+
+/**
+ * Listens, validates and delegates Spotify share SMS
+ */
+class SmsReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+
+        Log.d(TAG, "SMS Received!")
+
+        val txt = getTextFromSms(intent?.extras)
+        Log.d(TAG, "message=" + txt)
+
+        val url = validateSpotifyUrl(txt)
+        Log.d(TAG, "url=" + url)
+
+        url?.let { handleUrl(it) }
+    }
+
+    private fun handleUrl(url: String) {
+        // TODO: Send to Service
+    }
+
+    private fun getTextFromSms(extras: Bundle?): String {
+        val pdus = extras?.get("pdus") as Array<*>
+        val format = extras?.getString("format")
+        var txt = ""
+        for (pdu in pdus) {
+            val smsmsg = getSmsMsg(pdu as ByteArray?, format)
+            val submsg = smsmsg.displayMessageBody
+            txt = "$txt$submsg"
+        }
+        return txt
+    }
+
+    private fun getSmsMsg(pdu: ByteArray?, format: String?): SmsMessage {
+        when {
+            VERSION.SDK_INT >= VERSION_CODES.M -> return SmsMessage.createFromPdu(pdu, format)
+            else -> return SmsMessage.createFromPdu(pdu)
+        }
+    }
+
+    private fun validateSpotifyUrl(msg: String) : String? {
+        val url = msg.replaceBefore("https", "")
+        fun isValidUri(uri: UriBuilder): Boolean =
+                uri.scheme == "https" && uri.host == "open.spotify.com"
+        val parsed = buildUri(url)
+        return if (isValidUri(parsed)) parsed.asString() else null
+    }
+
+    companion object {
+        private val TAG = SmsReceiver::class.java.simpleName
+    }
+}
