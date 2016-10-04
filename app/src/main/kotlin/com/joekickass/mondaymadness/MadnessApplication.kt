@@ -22,7 +22,7 @@ class MadnessApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        val config = RealmConfiguration.Builder(this).build()
+        val config = RealmConfiguration.Builder(this).deleteRealmIfMigrationNeeded().build()
         Realm.setDefaultConfiguration(config)
     }
 

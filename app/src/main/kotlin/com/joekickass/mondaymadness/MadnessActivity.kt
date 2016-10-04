@@ -43,7 +43,7 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
 
         spotify = application.getSystemService("SpotifyService") as SpotifyFacade
 
-        setNewInterval()
+        //setNewInterval()
     }
 
     private fun setNewInterval() {

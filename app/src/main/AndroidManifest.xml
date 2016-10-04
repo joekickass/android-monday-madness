@@ -40,6 +40,8 @@
             </intent-filter>
         </receiver>
 
+        <service android:name=".realm.SpotifyShareHandlingService" />
+
     </application>
 
 </manifest>

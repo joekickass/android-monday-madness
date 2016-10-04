@@ -36,7 +36,6 @@ class WorkoutView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         // Read attributes
         val a = context.theme.obtainStyledAttributes(attrs, WorkoutView, 0, 0)
         try {
-
             // the style of the background
             val bgColor = a.getColor(WorkoutView_color_background, 0)
             setPaintProperties(mBackgroundPaint, bgColor)
@@ -79,26 +78,54 @@ class WorkoutView(context: Context, attrs: AttributeSet) : View(context, attrs) 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        val timer = mWorkout!!.timer
-
         val centerWidth = (canvas.width / 2).toFloat()
         val centerHeight = (canvas.height / 2).toFloat()
 
-        // Center the circle in the canvas
-        mCircleBounds.set(centerWidth - RADIUS,
-                centerHeight - RADIUS,
-                centerWidth + RADIUS,
-                centerHeight + RADIUS)
+        fun drawCircle(text: String, paint: Paint) {
+            canvas.drawCircle(centerWidth, centerHeight, RADIUS, paint)
+            canvas.drawText(text, centerWidth, centerHeight + mTextOffset, mTextPaint)
+        }
 
-        // Not yet started, show empty ring and total time (can be '0.0' if finished)
+        // Since drawArc only draws clockwise, we need to start with the whole circle filled with
+        // accent color, then paint it over with the background. It will look like it is the accent
+        // color increasing, when it is in fact the background decreasing
+        fun drawBackground(text: String) = drawCircle(text, mBackgroundPaint)
+        fun drawForeground(text: String) = drawCircle(text, mProgressPaint)
+        fun drawProgress(fraction: Double) {
+
+            // Center the circle in the canvas
+            mCircleBounds.set(centerWidth - RADIUS,
+                    centerHeight - RADIUS,
+                    centerWidth + RADIUS,
+                    centerHeight + RADIUS)
+
+            // Draw circle arc
+            canvas.drawArc(mCircleBounds, // Size of progress circle
+                        -90f, // -90 is at top
+                        (fraction * 360).toFloat(), // [ 0 <= progress <= 1]
+                        false,
+                        mBackgroundPaint)
+
+            // Draw nob on the circle arc
+            canvas.drawCircle(
+                    (centerWidth + Math.sin(fraction * 2.0 * Math.PI) * RADIUS).toFloat(),
+                    (centerHeight - Math.cos(fraction * 2.0 * Math.PI) * RADIUS).toFloat(),
+                    HANDLE_RADIUS.toFloat(),
+                    mProgressPaint)
+        }
+
+        // Draw uninitialized, initialized and finished wiew/workout
+        val workout = mWorkout
+        if (workout == null) {
+            drawBackground("0.0")
+            return
+        }
+
+        val timer = workout.timer
+
+        // Not yet started, show empty ring and total time
         if (timer.finished || timer.initialized) {
-
-            canvas.drawCircle(centerWidth, centerHeight, RADIUS, mBackgroundPaint)
-            canvas.drawText(
-                    timer.text,
-                    centerWidth,
-                    centerHeight + mTextOffset,
-                    mTextPaint)
+            drawBackground(timer.text)
             return
         }
 
@@ -109,33 +136,9 @@ class WorkoutView(context: Context, attrs: AttributeSet) : View(context, attrs) 
             return
         }
 
-        // Since drawArc only draws clockwise, we need to start with the whole circle filled with
-        // accent color, then paint it over with the background. It will look like it is the accent
-        // color increasing, when it is in fact the background decreasing.
-        canvas.drawCircle(centerWidth, centerHeight, RADIUS, mProgressPaint)
-
-        // Display text inside the circle
-        canvas.drawText(
-                timer.text,
-                centerWidth,
-                centerHeight + mTextOffset,
-                mTextPaint)
-
-        // Draw progress circle
-        // Decrease accent color circle by painting it over with background color.
-        canvas.drawArc(
-                mCircleBounds, // Size of progress circle
-                -90f, // -90 is at top
-                (timer.fraction * 360).toFloat(), // [ 0 <= progress <= 1]
-                false,
-                mBackgroundPaint)
-
-        // Draw nob on the circle
-        canvas.drawCircle(
-                (centerWidth + Math.sin(timer.fraction * 2.0 * Math.PI) * RADIUS).toFloat(),
-                (centerHeight - Math.cos(timer.fraction * 2.0 * Math.PI) * RADIUS).toFloat(),
-                HANDLE_RADIUS.toFloat(),
-                mProgressPaint)
+        // draw progress circle
+        drawForeground(timer.text)
+        drawProgress(timer.fraction)
 
         // make sure we continue draw ourselves until time expires
         postInvalidateOnAnimation()

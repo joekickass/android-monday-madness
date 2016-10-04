@@ -3,10 +3,12 @@ package com.joekickass.mondaymadness
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build.*
 import android.os.Bundle
 import android.telephony.SmsMessage
 import android.util.Log
+import com.joekickass.mondaymadness.realm.SpotifyShareHandlingService
 import uy.klutter.core.uri.UriBuilder
 import uy.klutter.core.uri.buildUri
 
@@ -25,11 +27,13 @@ class SmsReceiver : BroadcastReceiver() {
         val url = validateSpotifyUrl(txt)
         Log.d(TAG, "url=" + url)
 
-        url?.let { handleUrl(it) }
+        url?.let { handleUrl(context, it) }
     }
 
-    private fun handleUrl(url: String) {
-        // TODO: Send to Service
+    private fun handleUrl(context: Context?, url: String) {
+        val intent = Intent(context, SpotifyShareHandlingService::class.java)
+        intent.data = Uri.parse(url)
+        context?.startService(intent)
     }
 
     private fun getTextFromSms(extras: Bundle?): String {
