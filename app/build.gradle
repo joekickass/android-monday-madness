@@ -15,8 +15,8 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile 'com.android.support:design:24.2.1'
-    compile 'com.spotify.sdk:spotify-auth-beta22-noconnect-2.20b@aar'
-    compile 'com.spotify.sdk:spotify-player-beta22-noconnect-2.20b@aar'
+    compile 'com.spotify.sdk:spotify-auth-beta23-noconnect-2.20b@aar'
+    compile 'com.spotify.sdk:spotify-player-beta23-noconnect-2.20b@aar'
     compile 'uy.klutter:klutter-core:1.20.1'
     testCompile 'junit:junit:4.12'
 }
@@ -28,7 +28,7 @@ props.load(new FileInputStream(rootProject.file("release.properties")))
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '24.0.2'
+    buildToolsVersion '24.0.3'
 
     defaultConfig {
         applicationId "com.joekickass.mondaymadness"
