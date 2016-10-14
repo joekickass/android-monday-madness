@@ -17,6 +17,7 @@ import com.joekickass.mondaymadness.spotify.SpotifyFacade
 
 import io.realm.Realm
 import io.realm.RealmChangeListener
+import io.realm.RealmResults
 import io.realm.Sort
 
 import kotlinx.android.synthetic.main.activity_main.*
@@ -26,49 +27,52 @@ import kotlinx.android.synthetic.main.activity_main.*
  * New intervals will be added to Realm, and [MadnessActivity] will be notified through
  * [RealmChangeListener].
  */
-class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
+class MadnessActivity : AppCompatActivity(), RealmChangeListener<RealmResults<Interval>> {
 
     private var spotify : SpotifyFacade? = null
+
+    private var intervals: RealmResults<Interval>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        fab.setOnClickListener {
-            pwv.click()
-        }
+        fab.setOnClickListener { pwv.click() }
 
         val realm = Realm.getDefaultInstance()
-        realm.addChangeListener(this)
+        val results = realm.where(Interval::class.java).findAllSorted("timestamp", Sort.DESCENDING)
+        results.addChangeListener(this)
+        intervals = results
 
         spotify = application.getSystemService("SpotifyService") as SpotifyFacade
-
-        //setNewInterval()
     }
 
     private fun setNewInterval() {
-        val interval = lastInterval
-        Log.d(TAG, "Setting new interval: w=" + interval.workInMillis +
-                   " r=" + interval.restInMillis +
-                   " reps=" + interval.repetitions)
+        val interval = try { intervals?.first() } catch (e: IndexOutOfBoundsException) { null }
+        interval?.let {
+            Log.d(TAG, "Setting new interval: w=" + it.workInMillis +
+                        " r=" + it.restInMillis +
+                        " reps=" + it.repetitions)
 
-        val w = Workout(IntervalQueue(
-                interval.workInMillis,
-                interval.restInMillis,
-                interval.repetitions))
+            val w = Workout(IntervalQueue(
+                    it.workInMillis,
+                    it.restInMillis,
+                    it.repetitions))
 
-        w.onWorkRunning = { onWorkRunning() }
-        w.onWorkPaused = { onWorkPaused() }
-        w.onRestRunning = { onRestRunning() }
-        w.onRestPaused = { onRestPaused() }
-        w.onWorkoutFinished = { onFinished() }
-        pwv.init(w)
+            w.onWorkRunning = { onWorkRunning() }
+            w.onWorkPaused = { onWorkPaused() }
+            w.onRestRunning = { onRestRunning() }
+            w.onRestPaused = { onRestPaused() }
+            w.onWorkoutFinished = { onFinished() }
+            pwv.init(w)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        intervals?.removeChangeListener(this)
+        intervals = null
         val realm = Realm.getDefaultInstance()
-        realm.removeChangeListener(this)
         realm.close()
     }
 
@@ -88,12 +92,14 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
             }
 
             R.id.action_add -> {
-                val interval = lastInterval
-                val pickTime = AddIntervalDialogFragment.newInstance(
-                        interval.workInMillis,
-                        interval.restInMillis,
-                        interval.repetitions)
-                pickTime.show(fragmentManager, "timepicker")
+                val interval = try { intervals?.first() } catch (e: IndexOutOfBoundsException) { Interval() }
+                interval?.let {
+                    val pickTime = AddIntervalDialogFragment.newInstance(
+                            it.workInMillis,
+                            it.restInMillis,
+                            it.repetitions)
+                    pickTime.show(fragmentManager, "timepicker")
+                }
                 return true
             }
 
@@ -129,17 +135,9 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<Realm> {
     private fun onFinished() {
         Log.d(TAG, "onFinished")
         setStopState()
-        setNewInterval()
     }
 
-    private val lastInterval: Interval
-        get() {
-            val realm = Realm.getDefaultInstance()
-            val result = realm.where(Interval::class.java).findAllSorted("timestamp", Sort.DESCENDING)
-            return if (!result.isEmpty()) result.first() else Interval()
-        }
-
-    override fun onChange(realm: Realm) {
+    override fun onChange(results: RealmResults<Interval>) {
         Log.d(TAG, "Setting up new interval")
         setNewInterval()
     }
