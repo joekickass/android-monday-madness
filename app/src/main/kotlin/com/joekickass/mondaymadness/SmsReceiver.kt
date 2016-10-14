@@ -11,6 +11,7 @@ import android.util.Log
 import com.joekickass.mondaymadness.realm.SpotifyShareHandlingService
 import uy.klutter.core.uri.UriBuilder
 import uy.klutter.core.uri.buildUri
+import java.net.URISyntaxException
 
 /**
  * Listens, validates and delegates Spotify share SMS
@@ -42,13 +43,13 @@ class SmsReceiver : BroadcastReceiver() {
         var txt = ""
         for (pdu in pdus) {
             val smsmsg = getSmsMsg(pdu as ByteArray?, format)
-            val submsg = smsmsg.displayMessageBody
-            txt = "$txt$submsg"
+            val submsg = smsmsg?.displayMessageBody
+            submsg?.let { txt = "$txt$it" }
         }
         return txt
     }
 
-    private fun getSmsMsg(pdu: ByteArray?, format: String?): SmsMessage {
+    private fun getSmsMsg(pdu: ByteArray?, format: String?): SmsMessage? {
         when {
             VERSION.SDK_INT >= VERSION_CODES.M -> return SmsMessage.createFromPdu(pdu, format)
             else -> return SmsMessage.createFromPdu(pdu)
@@ -56,11 +57,11 @@ class SmsReceiver : BroadcastReceiver() {
     }
 
     private fun validateSpotifyUrl(msg: String) : String? {
-        val url = msg.replaceBefore("https", "")
         fun isValidUri(uri: UriBuilder): Boolean =
                 uri.scheme == "https" && uri.host == "open.spotify.com"
-        val parsed = buildUri(url)
-        return if (isValidUri(parsed)) parsed.asString() else null
+        val url = msg.replaceBefore("https", "")
+        val parsed = try { buildUri(url) } catch (e: URISyntaxException) { return null }
+        return if ( isValidUri(parsed) ) parsed.asString() else null
     }
 
     companion object {
