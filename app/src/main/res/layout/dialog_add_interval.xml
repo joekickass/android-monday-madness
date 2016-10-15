@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/work_section"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="@dimen/activity_horizontal_margin">
+        tools:layout_constraintTop_creator="1"
+        android:layout_marginStart="16dp"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:src="@drawable/ic_rowing_black_24dp"/>
+            android:src="@drawable/ic_rowing_black_24dp" />
 
         <com.joekickass.mondaymadness.menu.interval.AddIntervalPicker
             android:id="@+id/work_minute_picker"
@@ -26,7 +30,7 @@
             android:scaleY="0.7"
             android:scaleX="0.7"
             min="0"
-            max="59"/>
+            max="59" />
 
         <com.joekickass.mondaymadness.menu.interval.AddIntervalPicker
             android:id="@+id/work_second_picker"
@@ -35,7 +39,7 @@
             android:scaleY="0.7"
             android:scaleX="0.7"
             min="0"
-            max="59"/>
+            max="59" />
 
     </LinearLayout>
 
@@ -43,16 +47,19 @@
         android:id="@+id/rest_section"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-50dp"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_below="@id/work_section">
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        app:layout_constraintRight_toRightOf="@+id/work_section"
+        app:layout_constraintTop_toBottomOf="@+id/work_section"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintLeft_toLeftOf="@+id/work_section">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:src="@drawable/ic_hotel_black_24dp"/>
+            android:src="@drawable/ic_hotel_black_24dp" />
 
         <com.joekickass.mondaymadness.menu.interval.AddIntervalPicker
             android:id="@+id/rest_minute_picker"
@@ -62,7 +69,7 @@
             android:scaleY="0.7"
             android:scaleX="0.7"
             min="0"
-            max="59"/>
+            max="59" />
 
         <com.joekickass.mondaymadness.menu.interval.AddIntervalPicker
             android:id="@+id/rest_second_picker"
@@ -71,7 +78,7 @@
             android:scaleY="0.7"
             android:scaleX="0.7"
             min="0"
-            max="59"/>
+            max="59" />
 
     </LinearLayout>
 
@@ -79,16 +86,18 @@
         android:id="@+id/repetition_section"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-50dp"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_below="@id/rest_section">
+        tools:layout_constraintBottom_creator="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout_constraintLeft_creator="1"
+        android:layout_marginBottom="70dp"
+        app:layout_constraintLeft_toLeftOf="@+id/rest_section">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:src="@drawable/ic_loop_black_24dp"/>
+            android:src="@drawable/ic_loop_black_24dp" />
 
         <com.joekickass.mondaymadness.menu.interval.AddIntervalPicker
             android:id="@+id/repetition_picker"
@@ -98,8 +107,8 @@
             android:scaleY="0.7"
             android:scaleX="0.7"
             min="1"
-            max="40"/>
+            max="40" />
 
     </LinearLayout>
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

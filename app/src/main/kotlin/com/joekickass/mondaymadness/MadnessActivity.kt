@@ -72,8 +72,7 @@ class MadnessActivity : AppCompatActivity(), RealmChangeListener<RealmResults<In
         super.onDestroy()
         intervals?.removeChangeListener(this)
         intervals = null
-        val realm = Realm.getDefaultInstance()
-        realm.close()
+        Realm.getDefaultInstance().close()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

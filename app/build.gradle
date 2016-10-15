@@ -19,6 +19,7 @@ dependencies {
     compile 'com.spotify.sdk:spotify-player-beta23-noconnect-2.20b@aar'
     compile 'uy.klutter:klutter-core:1.20.1'
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha9'
 }
 
 apply from: '../versioning.gradle'
