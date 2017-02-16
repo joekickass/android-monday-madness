@@ -60,7 +60,7 @@ class SpotifyFacade() : ConnectionStateCallback, Player.NotificationCallback {
         Log.d(TAG, "onLoggedOut")
     }
 
-    override fun onLoginFailed(error: Int) {
+    override fun onLoginFailed(p0: Error?) {
         Log.d(TAG, "onLoginFailed")
     }
 

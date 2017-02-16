@@ -23,11 +23,6 @@
         </activity>
 
         <activity
-            android:name="com.spotify.sdk.android.authentication.LoginActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
-        </activity>
-
-        <activity
             android:name=".MadnessActivity"
             android:label="@string/app_name" />
 

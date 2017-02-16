@@ -12,14 +12,14 @@ apply plugin: 'net.researchgate.release'
 apply plugin: 'realm-android'
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:appcompat-v7:25.1.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile 'com.android.support:design:24.2.1'
-    compile 'com.spotify.sdk:spotify-auth-beta23-noconnect-2.20b@aar'
-    compile 'com.spotify.sdk:spotify-player-beta23-noconnect-2.20b@aar'
+    compile 'com.android.support:design:25.1.1'
+    compile 'com.spotify.sdk:spotify-android-auth-1.0.0@aar'
+    compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
     compile 'uy.klutter:klutter-core:1.20.1'
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha9'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta5'
 }
 
 apply from: '../versioning.gradle'
@@ -28,13 +28,13 @@ Properties props = new Properties()
 props.load(new FileInputStream(rootProject.file("release.properties")))
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion '24.0.3'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         applicationId "com.joekickass.mondaymadness"
         minSdkVersion 22
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode buildVersionCode()
         versionName version
     }

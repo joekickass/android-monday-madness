@@ -74,9 +74,7 @@ class StartActivity : AppCompatActivity() {
     }
 
     private fun handleLoginError(error: String) {
-        Log.e(TAG, "Failed to authenticate with Spotify: " + error)
-        Log.d(TAG, "Clearing cookies and retrying...")
-        AuthenticationClient.clearCookies(this)
+        Log.e(TAG, "Failed to authenticate with Spotify: " + error + ". Retrying...")
         startSpotifyAuth()
     }
 
